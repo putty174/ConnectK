@@ -6,7 +6,7 @@ public class DummyAI extends CKPlayer {
 
 	public DummyAI(byte player, BoardModel state) {
 		super(player, state);
-		teamName = "Fug";
+		teamName = "Team Maybe";
 	}
 
 	@Override
