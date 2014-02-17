@@ -6,20 +6,38 @@ public class DummyAI extends CKPlayer {
 
 	public DummyAI(byte player, BoardModel state) {
 		super(player, state);
-		teamName = "Team Maybe";
+		teamName = "DummyAI";
 	}
 
 	@Override
 	public Point getMove(BoardModel state) {
-		for(int i=0; i<state.getWidth(); ++i)
-			for(int j=0; j<state.getHeight(); ++j)
-				if(state.getSpace(i, j) == 0)
-					return new Point(i,j);
-		return null;
+		return getMove(state, 9999);
 	}
 
 	@Override
 	public Point getMove(BoardModel state, int deadline) {
-		return getMove(state);
+		long start = System.currentTimeMillis();
+		if(state.lastMove == null)
+			return firstMove(state);
+		else
+		{
+			return ids(0);
+		}
+	}
+	
+	private Point firstMove(BoardModel state) {
+		return new Point((state.getWidth() - 1) / 2,(state.getHeight() - 1) / 2);
+	}
+	
+	private Point ids(int depth) {
+		Point move = null;
+		
+		
+		return move;
+	}
+	
+	private boolean checkTime(long start, int deadline) {
+		long end = System.currentTimeMillis();
+		return (end - start) < (deadline * 0.95 * 1000);
 	}
 }
