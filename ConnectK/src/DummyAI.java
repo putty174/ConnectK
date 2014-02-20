@@ -5,23 +5,28 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class DummyAI extends CKPlayer {
-	private BoardModel board;
-	private HashSet<Point> relaventMoves = new HashSet<Point>();
-	private HashMap<Point, Chain>[] chains = new HashMap[2]; 
+	private BoardModel board; //The BoardModel state so we don't have to pass this everywhere
+	private HashSet<Point> relaventMoves = new HashSet<Point>(); //A list of empty spots 8 way adjacent to already placed pieces 
+	private HashMap<Point, Chain>[] chains = new HashMap[2]; //An array of maps for chains. 0 index is me, 1 index is opponent
 	
+	private long start; //A timer to track when our turn started
+	
+	//Constructor
 	public DummyAI(byte player, BoardModel state) {
 		super(player, state);
 		teamName = "DummyAI";
 	}
-
+	
+	//"main" decision function that doesn't have a deadline
 	@Override
 	public Point getMove(BoardModel state) {
 		return getMove(state, 9999);
 	}
-
+	
+	//"main decision function that does have a deadline
 	@Override
 	public Point getMove(BoardModel state, int deadline) {
-		long start = System.currentTimeMillis();
+		start = System.currentTimeMillis();
 		Point move;
 		board = state;
 		addRelaventMoves();
@@ -32,21 +37,25 @@ public class DummyAI extends CKPlayer {
 		return makeMove(move);
 	}
 	
+	//If we're first, automatically make this move
 	private Point firstMove(BoardModel state) {
 		return new Point((state.getWidth() - 1) / 2,(state.getHeight() - 1) / 2);
 	}
 	
+	//Otherwise, think about what mvoe to make
 	private Point ids(BoardModel state, int depth) {
 		Point move = dumbMove(state);
 		
 		return move;
 	}
 	
+	//Call whenever to check if we still have time
 	private boolean checkTime(long start, int deadline) {
 		long end = System.currentTimeMillis();
 		return (end - start) < (deadline * 0.95 * 1000);
 	}
 	
+	//Build the list of moves that are 8 way adjacent to tiles already filled
 	private void addRelaventMoves() {
 		int x;
 		int y;
@@ -61,18 +70,12 @@ public class DummyAI extends CKPlayer {
 				}
 	}
 	
-	private Point dumbMove(BoardModel state) {
-		for(int i = 0; i < state.width; i++)
-			for(int j = 0; j < state.height; j++)
-				if(state.pieces[i][j] == 0)
-					return new Point(i,j);
-		return null;
-	}
-	
+	//Adds chains by both players to memory
 	private void addChains() {
 		
 	}
 	
+	//Cleans up memory before giving up turn
 	private Point makeMove(Point move){
 		addChains();
 		removeRelaventMoves(move);
@@ -80,6 +83,7 @@ public class DummyAI extends CKPlayer {
 		return move;
 	}
 	
+	//Removes any already used moves by both players
 	private void removeRelaventMoves(Point move) {
 		if(relaventMoves.contains(board.lastMove))
 			relaventMoves.remove(board.lastMove);
@@ -87,16 +91,27 @@ public class DummyAI extends CKPlayer {
 			relaventMoves.remove(move);
 	}
 	
+	//Prints all relevant moves
 	private void printRelaventMoves() {
 		System.out.println();
 		for(Point p : relaventMoves)
 			System.out.println("All relavent moves: " + p.x + ", " + p.y);
 	}
 	
+	//Helper class to track chains
 	private class Chain {
-		private Point start;
-		private Point end;
-		private Point left;
-		private Point right;
+		private Point start; //Bottom left most spot where the chain starts
+		private Point end; //Top right most sot where the chain ends
+		private Point left; //Spot needed to extend chain at Start
+		private Point right; //Spot needed to extend chain at End
+	}
+	
+	//Until we have an actual AI to test, just choose the far left bottom spot
+	private Point dumbMove(BoardModel state) {
+		for(int i = 0; i < state.width; i++)
+			for(int j = 0; j < state.height; j++)
+				if(state.pieces[i][j] == 0)
+					return new Point(i,j);
+		return null;
 	}
 }
