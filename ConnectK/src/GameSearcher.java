@@ -8,7 +8,7 @@ public class GameSearcher {
 	int maxDepth;
 	// alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value found
 	// via alpha-beta pruning and some given evaluation function.
-	public Point alphaBetaSearch(BoardModel state, HashSet<Point> moves, byte player){
+	public Point alphaBetaSearch(BoardModel state, HashSet<Point> moves){
 		depth = 0;
 		maxDepth = 0;
 		long start = System.currentTimeMillis();
@@ -23,7 +23,7 @@ public class GameSearcher {
 		}
 		for(Point move:moves){
 			BoardModel c = state.clone();
-			c.placePiece(move, player);
+			c.placePiece(move, DummyAI.player);
 			if(eval(c) == best)
 				return move;
 		}
