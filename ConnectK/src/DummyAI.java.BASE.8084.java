@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public class DummyAI extends CKPlayer {
-	public static byte player;
-	public static byte enemy;
+	private int player;
+	private int enemy;
 	private BoardModel board; //The BoardModel state so we don't have to pass this everywhere
 	private HashSet<Point> relaventMoves = new HashSet<Point>(); //A list of empty spots 8 way adjacent to already placed pieces 
 	private Map<Point, List<Chain>> myChains = new HashMap<Point, List<Chain>>(); //An array of maps for our chains
@@ -27,11 +27,6 @@ public class DummyAI extends CKPlayer {
 	public DummyAI(byte player, BoardModel state) {
 		super(player, state);
 		teamName = "DummyAI";
-		this.player = player;
-		if(player == 1)
-			enemy = 2;
-		else
-			enemy = 1;
 	}
 	
 	//"main" decision function that doesn't have a deadline
@@ -45,12 +40,21 @@ public class DummyAI extends CKPlayer {
 	public Point getMove(BoardModel state, int deadline) {
 		start = System.currentTimeMillis();
 		board = state;
-		if(state.lastMove == null)
-			move = firstMove(state);
-		else {
-			readBoard();
-			move = ids(state,0);
+		if(player == 0) {
+			if(state.lastMove == null) {
+				player = 1;
+				enemy = 2;
+			}
+			else {
+				player = 2;
+				enemy = 1;
+			}
 		}
+		readBoard();
+		if(player == 1)
+			move = firstMove(state);
+		else
+			move = ids(state, 0);
 		return makeMove();
 	}
 	
@@ -102,44 +106,6 @@ public class DummyAI extends CKPlayer {
 		}
 	
 	private void addEnemyChains() {
-		newEnemyChains();
-		
-		for(Point p : enemyChains.keySet())	{
-			for(Chain l : enemyChains.get(p)) {
-				if(l.left != null) {
-					while(board.pieces[l.left.x][l.left.y] == enemy)
-						continueLeft(l);
-				}
-				if(l.right != null) {
-					while(board.pieces[l.right.x][l.right.y] == enemy)
-						continueRight(l);
-				}
-			}
-		}
-		
-	}
-
-	private void continueLeft(Chain l) {
-		int dy = l.right.y - l.left.y;
-		l.left.x--;
-		if(dy < 0)
-			l.left.y++;
-		else if(dy > 0)
-			l.left.y--;
-		l.length++;
-	}
-	
-	private void continueRight(Chain l) {
-		int dy = l.right.y - l.left.y;
-		l.left.x++;
-		if(dy < 0)
-			l.right.y--;
-		else if(dy > 0)
-			l.right.y++;
-		l.length++;
-	}
-
-	private void newEnemyChains() {
 		int x1, y1, x2, y2;
 		Point pl = null;
 		Point pr = null;
@@ -158,6 +124,17 @@ public class DummyAI extends CKPlayer {
 					chains.add(new Chain(1,pl, pr));
 				}
 		enemyChains.put(board.lastMove, chains);
+		for(Point p : enemyChains.keySet())	{
+			for(Chain l : enemyChains.get(p)) {
+				Point holdl = l.left;
+				Point holdr = l.right;
+				if(l.left != null && board.pieces[l.left.x][l.left.y] == enemy)
+					System.out.println("HA");
+				if(l.right != null && board.pieces[l.right.x][l.right.y] == enemy)
+					System.out.println("HA");
+			}
+		}
+		
 	}
 	
 	//Adds chains by both players to memory
@@ -169,7 +146,6 @@ public class DummyAI extends CKPlayer {
 	private Point makeMove(){
 		addChains();
 		removeRelaventMoves();
-		printEnemyChains();
 		return move;
 	}
 	
@@ -182,12 +158,6 @@ public class DummyAI extends CKPlayer {
 		System.out.println();
 		for(Point p : relaventMoves)
 			System.out.println("All relavent moves: " + p.x + ", " + p.y);
-	}
-	
-	private void printEnemyChains() {
-		for(List<Chain> l : enemyChains.values())
-			for(Chain c : l)
-				System.out.println("Left Point: (" + c.left.x + "," + c.left.y + ") \t Right Point: (" + c.right.x + "," + c.right.y + ") \t Length: " + c.length);
 	}
 	
 	//Helper class to track chains
