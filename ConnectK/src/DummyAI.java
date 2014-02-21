@@ -8,11 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 public class DummyAI extends CKPlayer {
+	private int player;
+	private int enemy;
 	private BoardModel board; //The BoardModel state so we don't have to pass this everywhere
 	private HashSet<Point> relaventMoves = new HashSet<Point>(); //A list of empty spots 8 way adjacent to already placed pieces 
-	private Map<Point, Chain> myChains = new HashMap<Point, Chain>(); //An array of maps for our chains
-	private Map<Point, Chain> enemyChains = new HashMap<Point, Chain>(); //An array of maps for enemy chains
+	private Map<Point, List<Chain>> myChains = new HashMap<Point, List<Chain>>(); //An array of maps for our chains
+	private Map<Point, List<Chain>> enemyChains = new HashMap<Point, List<Chain>>(); //An array of maps for enemy chains
 	
+	private BoardModel futureBoard;
+	private HashSet<Point> futureRelaventMoves = new HashSet<Point>();
 	private Point move; //The move we want to make
 	
 	private long start; //A timer to track when our turn started
@@ -33,9 +37,19 @@ public class DummyAI extends CKPlayer {
 	@Override
 	public Point getMove(BoardModel state, int deadline) {
 		start = System.currentTimeMillis();
-		readBoard();
 		board = state;
-		if(state.lastMove == null)
+		if(player == 0) {
+			if(state.lastMove == null) {
+				player = 1;
+				enemy = 2;
+			}
+			else {
+				player = 2;
+				enemy = 1;
+			}
+		}
+		readBoard();
+		if(player == 1)
 			move = firstMove(state);
 		else
 			move = ids(state, 0);
@@ -54,9 +68,10 @@ public class DummyAI extends CKPlayer {
 		return move;
 	}
 	
-	private void readBoard() {
+	private HashSet<Point> readBoard() {
 		addEnemyRelaventMoves();
 		addEnemyChains();
+		return futureRelaventMoves;
 	}
 	
 	//Call whenever to check if we still have time
@@ -92,7 +107,7 @@ public class DummyAI extends CKPlayer {
 		int x1, y1, x2, y2;
 		Point pl = null;
 		Point pr = null;
-		List<Point> chain = new ArrayList<Point>();
+		List<Chain> chains = new ArrayList<Chain>();
 		for(int i = -1; i < 2; i++)
 			for(int j = -1; j < 2; j++)
 				if(!(i == 0 && j == 0)) {
@@ -104,9 +119,17 @@ public class DummyAI extends CKPlayer {
 						pl = new Point(x1,y1);
 					if (isValid(x2, y2))
 						pr = new Point(x2,y2);
-					chain.add(board.lastMove);
-					enemyChains.put(board.lastMove, new Chain(chain, pl, pr));
+					chains.add(new Chain(1,pl, pr));
 				}
+		enemyChains.put(board.lastMove, chains);
+		for(Point p : enemyChains.keySet())	{
+			for(Chain l : enemyChains.get(p)) {
+				if(l.left != null && board.pieces[l.left.x][l.left.y] == enemy)
+					System.out.println("HA");
+				if(l.right != null && board.pieces[l.right.x][l.right.y] == enemy)
+					System.out.println("HA");
+			}
+		}
 		
 	}
 	
@@ -119,7 +142,6 @@ public class DummyAI extends CKPlayer {
 	private Point makeMove(){
 		addChains();
 		removeRelaventMoves();
-		printRelaventMoves();
 		return move;
 	}
 	
@@ -136,11 +158,11 @@ public class DummyAI extends CKPlayer {
 	
 	//Helper class to track chains
 	private class Chain {
-		private List<Point> chain; //List of tiles that make up a chain
-		private Point left; //Spot needed to extend chain at Start
-		private Point right; //Spot needed to extend chain at End
-		public Chain(List<Point> c, Point l, Point r) {
-			chain = c;
+		public int length; //List of tiles that make up a chain
+		public Point left; //Spot needed to extend chain at Start
+		public Point right; //Spot needed to extend chain at End
+		public Chain(int len, Point l, Point r) {
+			length = len;
 			left = l;
 			right = r;
 		}
