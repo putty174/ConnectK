@@ -107,59 +107,77 @@ public class DummyAI extends CKPlayer {
 		newEnemyChains();
 		
 		for(Point p : enemyChains.keySet())	{
-			for(Chain l : enemyChains.get(p)) {
-				if(l.left != null) {
-					while(board.pieces[l.left.x][l.left.y] == enemy)
-						continueLeft(l);
-				}
-				if(l.right != null) {
-					while(board.pieces[l.right.x][l.right.y] == enemy)
-						continueRight(l);
-				}
+			for(Chain c : enemyChains.get(p)) {
+				while(c.left != null && board.pieces[c.left.x][c.left.y] == enemy)
+					continueEnemyLeft(c);
+				while(c.right != null && board.pieces[c.right.x][c.right.y] == enemy)
+					continueEnemyRight(c);
+				System.out.println("Left: " + c.left + " \t Right: " + c.right + "\t Length: " + c.length);
 			}
 		}
 		
 	}
 
-	private void continueLeft(Chain l) {
-		int dy = l.right.y - l.left.y;
-		l.left.x--;
+	private void continueEnemyLeft(Chain c) {
+		int dx = c.right.x - c.left.x;
+		int dy = c.right.y - c.left.y;
+		
+		if(dx < 0)
+			c.left.x++;
+		else if(dx > 0)
+			c.left.x--;
 		if(dy < 0)
-			l.left.y++;
+			c.left.y++;
 		else if(dy > 0)
-			l.left.y--;
-		l.length++;
+			c.left.y--;
+		
+		if(isValidEnemy(c.left.x, c.left.y))
+			c.length++;
+		else
+			c.left = null;
+		
 	}
 	
-	private void continueRight(Chain l) {
-		int dy = l.right.y - l.left.y;
-		l.left.x++;
+	private void continueEnemyRight(Chain c) {
+		int dx = c.right.x - c.left.x;
+		int dy = c.right.y - c.left.y;
+		
+		if(dx < 0)
+			c.right.x--;
+		else if(dx > 0)
+			c.right.x++;
 		if(dy < 0)
-			l.right.y--;
+			c.right.y--;
 		else if(dy > 0)
-			l.right.y++;
-		l.length++;
+			c.right.y++;
+		
+		if(isValidEnemy(c.right.x, c.right.y))
+			c.length++;
+		else
+			c.right = null;
 	}
 
 	private void newEnemyChains() {
 		int x1, y1, x2, y2;
-		Point pl = null;
-		Point pr = null;
+		Point pl = null, pr = null;
 		List<Chain> chains = new ArrayList<Chain>();
 		for(int i = -1; i < 2; i++)
 			for(int j = -1; j < 2; j++)
 				if(!(i == 0 && j == 0)) {
+					pl = null;
+					pr = null;
 					x1 = board.lastMove.x + i;
 					x2 = board.lastMove.x - i;
 					y1 = board.lastMove.y + j;
 					y2 = board.lastMove.y - j;
-					if (isValid(x1,y1))
+					if (isValidHolder(x1,y1))
 						pl = new Point(x1,y1);
-					if (isValid(x2, y2))
+					if (isValidHolder(x2, y2))
 						pr = new Point(x2,y2);
-					chains.add(new Chain(1,pl, pr));
+					if(!(pl == null && pr == null))
+						chains.add(new Chain(1,pl, pr));
 				}
-		enemyChains.put(board.lastMove, chains);
+			enemyChains.put(board.lastMove, chains);
 	}
 	
 	//Adds chains by both players to memory
@@ -171,12 +189,19 @@ public class DummyAI extends CKPlayer {
 	private Point makeMove(){
 		addChains();
 		removeRelaventMoves();
-		printEnemyChains();
 		return move;
 	}
 	
 	private boolean isValid(int x, int y) {
 		return ((x > -1 && x < board.width) && (y > -1 && y < board.height) && board.pieces[x][y] == 0);
+	}
+	
+	private boolean isValidHolder(int x, int y) {
+		return ((x > -2 && x < board.width + 1) && (y > -2 && y < board.height + 1) && board.pieces[x][y] == 0);
+	}
+	
+	private boolean isValidEnemy(int x, int y) {
+		return ((x > -2 && x < board.width + 1) && (y > -2 && y < board.height + 1) && (board.pieces[x][y] == 0 || board.pieces[x][y] == enemy));
 	}
 	
 	//Prints all relevant moves
@@ -188,8 +213,9 @@ public class DummyAI extends CKPlayer {
 	
 	private void printEnemyChains() {
 		for(List<Chain> l : enemyChains.values())
-			for(Chain c : l)
-				System.out.println("Left Point: (" + c.left.x + "," + c.left.y + ") \t Right Point: (" + c.right.x + "," + c.right.y + ") \t Length: " + c.length);
+			for(Chain c : l) {
+				System.out.println("Left: " + c.left + " \t Right: " + c.right + "\t Length: " + c.length);
+			}
 	}
 	
 	//Until we have an actual AI to test, just choose the far left bottom spot
