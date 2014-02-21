@@ -23,6 +23,8 @@ public class DummyAI extends CKPlayer {
 	
 	private long start; //A timer to track when our turn started
 	
+	private GameSearcher GS = new GameSearcher();
+	
 	//Constructor
 	public DummyAI(byte player, BoardModel state) {
 		super(player, state);
@@ -49,7 +51,7 @@ public class DummyAI extends CKPlayer {
 			move = firstMove(state);
 		else {
 			readBoard();
-			move = ids(state,0);
+			move = GS.alphaBetaSearch(board, relaventMoves);
 		}
 		return makeMove();
 	}
@@ -188,18 +190,6 @@ public class DummyAI extends CKPlayer {
 		for(List<Chain> l : enemyChains.values())
 			for(Chain c : l)
 				System.out.println("Left Point: (" + c.left.x + "," + c.left.y + ") \t Right Point: (" + c.right.x + "," + c.right.y + ") \t Length: " + c.length);
-	}
-	
-	//Helper class to track chains
-	private class Chain {
-		public int length; //List of tiles that make up a chain
-		public Point left; //Spot needed to extend chain at Start
-		public Point right; //Spot needed to extend chain at End
-		public Chain(int len, Point l, Point r) {
-			length = len;
-			left = l;
-			right = r;
-		}
 	}
 	
 	//Until we have an actual AI to test, just choose the far left bottom spot
