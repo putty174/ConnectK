@@ -4,7 +4,7 @@ import java.util.HashSet;
 import connectK.BoardModel;
 
 public class HelperFunctions {
-	public HashSet<Point> relaventMoves(BoardModel state, HashSet<Point> current) {
+	public HashSet<Point> relevantMoves(BoardModel state, HashSet<Point> current) {
 		HashSet<Point> list = new HashSet<Point>(current);
 		int x;
 		int y;
