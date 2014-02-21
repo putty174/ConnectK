@@ -6,6 +6,12 @@ import connectK.BoardModel;
 public class GameSearcher {
 	int depth;
 	int maxDepth;
+	HelperFunctions helper;
+	
+	public GameSearcher(){
+		helper = new HelperFunctions();
+	}
+	
 	// alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value found
 	// via alpha-beta pruning and some given evaluation function.
 	public Point alphaBetaSearch(BoardModel state, HashSet<Point> moves){
@@ -36,7 +42,7 @@ public class GameSearcher {
 			return eval(state);
 		}
 		int value = -99999;
-		updateMoves(moves, state);
+		helper.relevantMoves(state, moves);
 		for(Point move:moves){
 			BoardModel c = state.clone();
 			c.placePiece(move, DummyAI.player);
@@ -55,7 +61,7 @@ public class GameSearcher {
 			return eval(state);
 		}
 		int value = 99999;
-		updateMoves(moves, state);
+		helper.relevantMoves(state, moves);
 		for(Point move:moves){
 			BoardModel c = state.clone();
 			c.placePiece(move, DummyAI.enemy);
@@ -66,12 +72,6 @@ public class GameSearcher {
 			b = Math.min(b, value);
 		}
 		return value;
-	}
-	
-	// updateMoves() updates the given hashset of moves based on the given board state
-	// by looking at the changes incurred by the previous move.
-	private void updateMoves(HashSet<Point> moves, BoardModel state){
-		
 	}
 	
 	// The evaluation function does things. We are probably going to end up with many of these!
