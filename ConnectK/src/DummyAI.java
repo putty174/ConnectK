@@ -180,8 +180,4 @@ public class DummyAI extends CKPlayer {
 					return new Point(i,j);
 		return null;
 	}
-	
-	public byte getPlayer(){
-		return player;
-	}
 }
