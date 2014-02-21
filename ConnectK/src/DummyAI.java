@@ -116,7 +116,7 @@ public class DummyAI extends CKPlayer {
 					x1 = board.lastMove.x + i;
 					x2 = board.lastMove.x - i;
 					y1 = board.lastMove.y + j;
-					y2 = board.lastMove.y - i;
+					y2 = board.lastMove.y - j;
 					if (isValid(x1,y1))
 						pl = new Point(x1,y1);
 					if (isValid(x2, y2))
@@ -126,6 +126,8 @@ public class DummyAI extends CKPlayer {
 		enemyChains.put(board.lastMove, chains);
 		for(Point p : enemyChains.keySet())	{
 			for(Chain l : enemyChains.get(p)) {
+				Point holdl = l.left;
+				Point holdr = l.right;
 				if(l.left != null && board.pieces[l.left.x][l.left.y] == enemy)
 					System.out.println("HA");
 				if(l.right != null && board.pieces[l.right.x][l.right.y] == enemy)
