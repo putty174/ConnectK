@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public class DummyAI extends CKPlayer {
-	private int player;
-	private int enemy;
+	public static byte player;
+	public static byte enemy;
 	private BoardModel board; //The BoardModel state so we don't have to pass this everywhere
 	private HashSet<Point> relaventMoves = new HashSet<Point>(); //A list of empty spots 8 way adjacent to already placed pieces 
 	private Map<Point, List<Chain>> myChains = new HashMap<Point, List<Chain>>(); //An array of maps for our chains
