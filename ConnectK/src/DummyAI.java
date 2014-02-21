@@ -17,6 +17,8 @@ public class DummyAI extends CKPlayer {
 	
 	private BoardModel futureBoard;
 	private HashSet<Point> futureRelaventMoves = new HashSet<Point>();
+	private Map<Point, List<Chain>> futureMyChains = new HashMap<Point, List<Chain>>();
+	private Map<Point, List<Chain>> futureEnemyChains = new HashMap<Point, List<Chain>>();
 	private Point move; //The move we want to make
 	
 	private long start; //A timer to track when our turn started
