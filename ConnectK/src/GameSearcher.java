@@ -29,8 +29,8 @@ public class GameSearcher {
 		}
 		return null;
 	}
-
 	
+	// Part of alpha-beta pruning algorithm
 	private int maxValue(BoardModel state, int a, int b, HashSet<Point> moves){
 		if(state.winner() != 0 || depth >= maxDepth){
 			return eval(state);
@@ -49,6 +49,7 @@ public class GameSearcher {
 		return value;
 	}
 	
+	// Part of alpha-beta pruning algorithm
 	private int minValue(BoardModel state, int a, int b, HashSet<Point> moves) {
 		if(state.winner() != 0 || depth >= maxDepth){
 			return eval(state);
@@ -66,13 +67,24 @@ public class GameSearcher {
 		}
 		return value;
 	}
+	
 	// updateMoves() updates the given hashset of moves based on the given board state
 	// by looking at the changes incurred by the previous move.
 	private void updateMoves(HashSet<Point> moves, BoardModel state){
 		
 	}
-	// The evaluation function does things.
+	
+	// The evaluation function does things. We are probably going to end up with many of these!
+	// Or maybe just a few, if we're lazy.
+	
+	/*
+	 Evaluation Function 1:
+	 ANY BOARD WITH THE PIECE IN THE MIDDLE IS THE GREATEST.
+	 */
 	private int eval(BoardModel state) {
-		
+		if(state.getSpace((state.getWidth() - 1) / 2,(state.getHeight() - 1) / 2) == (DummyAI.player)){
+			return 9;
+		}
+		else return -9;
 	}
 }
