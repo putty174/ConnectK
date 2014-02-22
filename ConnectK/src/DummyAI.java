@@ -90,7 +90,7 @@ public class DummyAI extends CKPlayer {
 				if(!(i == 0 && j == 0)) {
 					x = board.lastMove.x + i;
 					y = board.lastMove.y + j;
-					if (isValid(x,y))
+					if (isEmpty(x,y))
 						relaventMoves.add(new Point(x,y));
 				}
 	}
@@ -108,9 +108,9 @@ public class DummyAI extends CKPlayer {
 		
 		for(Point p : enemyChains.keySet())	{
 			for(Chain c : enemyChains.get(p)) {
-				while(c.left != null && board.pieces[c.left.x][c.left.y] == enemy)
+				while(c.left != null && isValid(c.left.x, c.left.y) && board.pieces[c.left.x][c.left.y] == enemy)
 					continueEnemyLeft(c);
-				while(c.right != null && board.pieces[c.right.x][c.right.y] == enemy)
+				while(c.right != null && isValid(c.right.x, c.right.y) && board.pieces[c.right.x][c.right.y] == enemy)
 					continueEnemyRight(c);
 				System.out.println("Left: " + c.left + " \t Right: " + c.right + "\t Length: " + c.length);
 			}
@@ -161,23 +161,39 @@ public class DummyAI extends CKPlayer {
 		int x1, y1, x2, y2;
 		Point pl = null, pr = null;
 		List<Chain> chains = new ArrayList<Chain>();
-		for(int i = -1; i < 2; i++)
-			for(int j = -1; j < 2; j++)
-				if(!(i == 0 && j == 0)) {
-					pl = null;
-					pr = null;
-					x1 = board.lastMove.x + i;
-					x2 = board.lastMove.x - i;
-					y1 = board.lastMove.y + j;
-					y2 = board.lastMove.y - j;
-					if (isValidHolder(x1,y1))
-						pl = new Point(x1,y1);
-					if (isValidHolder(x2, y2))
-						pr = new Point(x2,y2);
-					if(!(pl == null && pr == null))
-						chains.add(new Chain(1,pl, pr));
-				}
-			enemyChains.put(board.lastMove, chains);
+		
+		for(int j = -1; j < 2; j++) {
+			x1 = board.lastMove.x - 1;
+			x2 = board.lastMove.x + 1;
+			y1 = board.lastMove.y + j;
+			y2 = board.lastMove.y - j;
+			if(isValidHolder(x1, y1))
+				pl = new Point(x1, y1);
+			if(isValidHolder(x2, y2))
+				pr = new Point(x2, y2);
+			if(newEnemyChain(x1,y1) && newEnemyChain(x2,y2))
+				chains.add(new Chain(1,pl,pr));
+		}
+		
+		x1 = board.lastMove.x;
+		x2 = board.lastMove.x;
+		y1 = board.lastMove.y - 1;
+		y2 = board.lastMove.y + 1;
+		if(isValidHolder(x1, y1))
+			pl = new Point(x1, y1);
+		if(isValidHolder(x2, y2))
+			pr = new Point(x2, y2);
+		if(newEnemyChain(x1,y1) && newEnemyChain(x2,y2))
+			chains.add(new Chain(1,pl,pr));
+		
+		enemyChains.put(board.lastMove, chains);
+	}
+	
+	private boolean newEnemyChain(int x, int y) {
+		if(isValid(x,y))
+			return !(board.pieces[x][y] == enemy);
+		else
+			return true;
 	}
 	
 	//Adds chains by both players to memory
@@ -193,11 +209,15 @@ public class DummyAI extends CKPlayer {
 	}
 	
 	private boolean isValid(int x, int y) {
-		return ((x > -1 && x < board.width) && (y > -1 && y < board.height) && board.pieces[x][y] == 0);
+		return (x > -1 && x < board.width) && (y > -1 && y < board.height);
+	}
+	
+	private boolean isEmpty(int x, int y) {
+		return (isValid(x,y) && board.pieces[x][y] == 0);
 	}
 	
 	private boolean isValidHolder(int x, int y) {
-		return ((x > -2 && x < board.width + 1) && (y > -2 && y < board.height + 1) && board.pieces[x][y] == 0);
+		return ((x > -2 && x < board.width + 1) && (y > -2 && y < board.height + 1));
 	}
 	
 	private boolean isValidEnemy(int x, int y) {
