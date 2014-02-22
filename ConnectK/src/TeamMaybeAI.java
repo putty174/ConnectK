@@ -57,7 +57,7 @@ public class TeamMaybeAI extends CKPlayer {
 			move = firstMove(state);
 		else {
 			readBoard();
-			move = GS.alphaBetaSearch(board, relaventMoves, myChains, enemyChains);
+			move = GS.alphaBetaSearch(board, deadline, relaventMoves, myChains, enemyChains);
 		}
 		return makeMove();
 	}

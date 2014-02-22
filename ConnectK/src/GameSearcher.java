@@ -6,9 +6,12 @@ import java.util.Map;
 import connectK.BoardModel;
 
 public class GameSearcher {
-	int depth;
-	int maxDepth;
 	HelperFunctions helper;
+	long start;
+	int deadline;
+	Point bestMove;
+	int bestValue = Integer.MIN_VALUE;
+	
 	
 	public GameSearcher(){
 		helper = new HelperFunctions();
@@ -16,66 +19,79 @@ public class GameSearcher {
 	
 	// alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value found
 	// via alpha-beta pruning and some given evaluation function.
-	public Point alphaBetaSearch(BoardModel state, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains){
-		depth = 0;
-		maxDepth = 0;
-		long start = System.currentTimeMillis();
+	public Point alphaBetaSearch(BoardModel state, int deadline, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains){
+		int depth = 0;
+		int maxDepth = 0;
+		start = System.currentTimeMillis();
+		this.deadline = deadline;
 		// Timer needs to be implemented better, preferably within maxValue and minValue
 		// Also this doesn't make use of the deadline variable. Bad practice
 		// Also needs global access to timer and deadline from main file
 		int best = Integer.MIN_VALUE;
-		while(5 > System.currentTimeMillis() - start){
+		while(!timesUp()){
 			depth = 0;
 			maxDepth++;
-			best = maxValue(state, Integer.MIN_VALUE, Integer.MAX_VALUE, moves, myChains, enemyChains);
+			System.out.println("Depth: " + maxDepth);
+			best = maxValue(state, Integer.MIN_VALUE, Integer.MAX_VALUE, moves, myChains, enemyChains, depth, maxDepth);
+			System.out.println("Best: " + best);
 		}
 		for(Point move:moves){
 			BoardModel c = state.clone();
 			c.placePiece(move, TeamMaybeAI.player);
 			int val = eval(c, myChains, enemyChains);
-			System.out.println("Move: (" + move.x + "," + move.y + ")");
+			//System.out.println("Move: (" + move.x + "," + move.y + ")");
+			if(val > bestValue) {
+				bestValue = val;
+				bestMove = new Point(move);
+			}
 			if(state.pieces[move.x][move.y] == 0 && val == best) {
 				return move;
 			}
 		}
-		return null;
+		return bestMove;
 	}
 	
 	// Part of alpha-beta pruning algorithm
-	private int maxValue(BoardModel state, int a, int b, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains){
-		if(state.winner() != 0 || depth >= maxDepth){
+	private int maxValue(BoardModel state, int a, int b, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth, int maxDepth){
+		if(state.winner() != -1 || depth >= maxDepth || timesUp()){
 			return eval(state, myChains, enemyChains);
 		}
 		int value = Integer.MIN_VALUE;
-		helper.relevantMoves(state, moves);
+		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
+		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
+		Map<Point, List<Chain>> currentEnemyChains = helper.addEnemyChains(state, enemyChains);
 		for(Point move:moves){
 			BoardModel c = state.clone();
-			c.placePiece(move, TeamMaybeAI.player);
-			value = Math.max(value, minValue(c, a, b, moves, myChains, enemyChains));
+			c = c.placePiece(move, TeamMaybeAI.player);
+			value = Math.max(value, minValue(c, a, b, currentRelevantMoves, currentMyChains, currentEnemyChains, depth+1, maxDepth));
 			if(value >= b){
 				return value;
 			}
 			a = Math.max(a, value);
 		}
+		//System.out.println("Max Value: " + value);
 		return value;
 	}
 	
 	// Part of alpha-beta pruning algorithm
-	private int minValue(BoardModel state, int a, int b, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains) {
-		if(state.winner() != 0 || depth >= maxDepth){
+	private int minValue(BoardModel state, int a, int b, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth, int maxDepth) {
+		if(state.winner() != -1 || depth >= maxDepth || timesUp()){
 			return eval(state, myChains, enemyChains);
 		}
 		int value = Integer.MAX_VALUE;
-		helper.relevantMoves(state, moves);
+		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
+		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
+		Map<Point, List<Chain>> currentEnemyChains = helper.addEnemyChains(state, enemyChains);
 		for(Point move:moves){
 			BoardModel c = state.clone();
-			c.placePiece(move, TeamMaybeAI.enemy);
-			value = Math.min(value, maxValue(c, a, b, moves, myChains, enemyChains));
+			c = c.placePiece(move, TeamMaybeAI.enemy);
+			value = Math.min(value, maxValue(c, a, b, currentRelevantMoves, currentMyChains, currentEnemyChains, depth+1, maxDepth));
 			if(value <= a){
 				return value;
 			}
 			b = Math.min(b, value);
 		}
+		//System.out.println("Min Value: " + value);
 		return value;
 	}
 	
@@ -91,46 +107,22 @@ public class GameSearcher {
 		for (int k = state.kLength; k > 0; k--) {
 			for(List<Chain> l : myChains.values()) {
 				for(Chain c : l) {
-					if(c.length == k) {
-						Point left = c.left;
-						Point right = c.right;
-						if(c.left != null && !c.deadLeft && state.pieces[c.left.x][c.left.y] == 0 && result < (100^k+5)) {
-							if(k == state.kLength)
-								result = Integer.MAX_VALUE;
-							else
-								result += 100^k^k+5;
-						}
-						if(c.right != null && !c.deadRight && state.pieces[c.right.x][c.right.y] == 0 && result < (100^k+7)) {
-							if(k == state.kLength)
-								result = Integer.MAX_VALUE;
-							else
-								result += 100^k^k+7;
-						}
-					}
+					if(!c.deadLeft && !c.deadRight && c.length == k)
+						result += c.length * 100^k^k;
 				}
 			}
 			for(List<Chain> l : enemyChains.values()) {
 				for(Chain c : l) {
-					if(c.length == k) {
-						Point left = c.left;
-						Point right = c.right;
-						if(c.left != null && !c.deadLeft && state.pieces[c.left.x][c.left.y] == 0 && result < (100^k+1)) {
-							if(k > state.kLength - 1)
-								result = Integer.MIN_VALUE;
-							else
-								result -= (100^k^k + 1);
-						}
-						if(c.right != null && !c.deadRight && state.pieces[c.right.x][c.right.y] == 0 && result < (100^k+3)) {
-							if(k > state.kLength - 1)
-								result = Integer.MIN_VALUE;
-							else
-								result -= (100^k^k + 3);
-						}
-					}
+					if(!c.deadLeft && !c.deadRight && c.length == k)
+						result -= c.length * 100^k^k;
 				}
 			}
 		}
-		System.out.println("Move: (" + state.lastMove.x + "," + state.lastMove.y + ")\tEval: " + result);
+		//System.out.println("Move: (" + state.lastMove.x + "," + state.lastMove.y + ")\tEval: " + result);
 		return result;
+	}
+	
+	public boolean timesUp() {
+		return (deadline * 0.4 < System.currentTimeMillis() - start);
 	}
 }
