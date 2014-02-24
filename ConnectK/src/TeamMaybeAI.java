@@ -25,7 +25,7 @@ public class TeamMaybeAI extends CKPlayer {
 	private Map<Point, List<Chain>> futureEnemyChains = new HashMap<Point, List<Chain>>();
 	private Point move; //The move we want to make
 	
-	private long start; //A timer to track when our turn started
+	private static long start; //A timer to track when our turn started
 	
 	private GameSearcher GS = new GameSearcher();
 	
@@ -57,7 +57,19 @@ public class TeamMaybeAI extends CKPlayer {
 			move = firstMove(state);
 		else {
 			readBoard();
-			move = GS.alphaBetaSearch(board, deadline, relaventMoves, myChains, enemyChains);
+			int maxDepth = 0;
+			Point tempMove;
+			while(!timesUp(deadline)){
+				maxDepth++;
+				tempMove = GS.alphaBetaSearch(board, deadline, relaventMoves, myChains, enemyChains, maxDepth);
+				if(tempMove != null){
+					move = tempMove;
+				}
+				else{
+					System.out.println("DEADLINE");
+				}
+			}
+			
 		}
 		return makeMove();
 	}
@@ -399,5 +411,9 @@ public class TeamMaybeAI extends CKPlayer {
 				if(state.pieces[i][j] == 0)
 					return new Point(i,j);
 		return null;
+	}
+	
+	public static boolean timesUp(int deadline) {
+		return (deadline * 0.4 < System.currentTimeMillis() - start);
 	}
 }

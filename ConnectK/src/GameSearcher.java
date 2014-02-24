@@ -11,6 +11,8 @@ public class GameSearcher {
 	int deadline;
 	Point bestMove;
 	int bestValue = Integer.MIN_VALUE;
+	int a;
+	int b;
 	
 	
 	public GameSearcher(){
@@ -19,15 +21,31 @@ public class GameSearcher {
 	
 	// alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value found
 	// via alpha-beta pruning and some given evaluation function.
-	public Point alphaBetaSearch(BoardModel state, int deadline, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains){
+	public Point alphaBetaSearch(BoardModel state, int deadline, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int maxDepth){
 		int depth = 0;
-		int maxDepth = 0;
-		start = System.currentTimeMillis();
 		this.deadline = deadline;
 		// Timer needs to be implemented better, preferably within maxValue and minValue
 		// Also this doesn't make use of the deadline variable. Bad practice
 		// Also needs global access to timer and deadline from main file
 		int best = Integer.MIN_VALUE;
+		depth = 0;
+		System.out.println("Depth: " + maxDepth);
+		for(Point move:moves){
+			a = Integer.MIN_VALUE;
+			b = Integer.MAX_VALUE;
+			BoardModel c = state.clone();
+			c.placePiece(move,  TeamMaybeAI.player);	
+			int thisMoveValue = minValue(state, moves, myChains, enemyChains, depth, maxDepth);
+			if(TeamMaybeAI.timesUp(deadline)){
+				return null;
+			}
+			if(best < thisMoveValue){
+				best = thisMoveValue;
+				bestMove = move;
+				System.out.println("NEW KING OF MOVES: " + best + "; which is " + bestMove);
+			}
+		}
+		/*
 		while(!timesUp()){
 			depth = 0;
 			maxDepth++;
@@ -48,22 +66,24 @@ public class GameSearcher {
 				return move;
 			}
 		}
+		*/
 		return bestMove;
 	}
 	
 	// Part of alpha-beta pruning algorithm
-	private int maxValue(BoardModel state, int a, int b, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth, int maxDepth){
-		if(state.winner() != -1 || depth >= maxDepth || timesUp()){
-			return eval(state, myChains, enemyChains);
-		}
-		int value = Integer.MIN_VALUE;
+	private int maxValue(BoardModel state, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth, int maxDepth){
 		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
 		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
 		Map<Point, List<Chain>> currentEnemyChains = helper.addEnemyChains(state, enemyChains);
+		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
+			return eval(state, myChains, enemyChains);
+		}
+		int value = Integer.MIN_VALUE;
+		
 		for(Point move:moves){
 			BoardModel c = state.clone();
 			c = c.placePiece(move, TeamMaybeAI.player);
-			value = Math.max(value, minValue(c, a, b, currentRelevantMoves, currentMyChains, currentEnemyChains, depth+1, maxDepth));
+			value = Math.max(value, minValue(c, currentRelevantMoves, currentMyChains, currentEnemyChains, depth+1, maxDepth));
 			if(value >= b){
 				return value;
 			}
@@ -74,18 +94,19 @@ public class GameSearcher {
 	}
 	
 	// Part of alpha-beta pruning algorithm
-	private int minValue(BoardModel state, int a, int b, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth, int maxDepth) {
-		if(state.winner() != -1 || depth >= maxDepth || timesUp()){
-			return eval(state, myChains, enemyChains);
-		}
-		int value = Integer.MAX_VALUE;
+	private int minValue(BoardModel state, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth, int maxDepth) {
 		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
 		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
 		Map<Point, List<Chain>> currentEnemyChains = helper.addEnemyChains(state, enemyChains);
+		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
+			return eval(state, myChains, enemyChains);
+		}
+		int value = Integer.MAX_VALUE;
+
 		for(Point move:moves){
 			BoardModel c = state.clone();
 			c = c.placePiece(move, TeamMaybeAI.enemy);
-			value = Math.min(value, maxValue(c, a, b, currentRelevantMoves, currentMyChains, currentEnemyChains, depth+1, maxDepth));
+			value = Math.min(value, maxValue(c, currentRelevantMoves, currentMyChains, currentEnemyChains, depth+1, maxDepth));
 			if(value <= a){
 				return value;
 			}
@@ -95,13 +116,7 @@ public class GameSearcher {
 		return value;
 	}
 	
-	// The evaluation function does things. We are probably going to end up with many of these!
-	// Or maybe just a few, if we're lazy.
-	
-	/*
-	 Evaluation Function 1:
-	 ANY BOARD WITH THE PIECE IN THE MIDDLE IS THE GREATEST.
-	 */
+
 	private int eval(BoardModel state, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains) {
 		int result = 0;
 		for (int k = state.kLength; k > 0; k--) {
@@ -122,7 +137,5 @@ public class GameSearcher {
 		return result;
 	}
 	
-	public boolean timesUp() {
-		return (deadline * 0.4 < System.currentTimeMillis() - start);
-	}
+	
 }
