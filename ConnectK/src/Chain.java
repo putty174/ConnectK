@@ -13,4 +13,8 @@ public class Chain {
 			deadLeft = dl;
 			deadRight = dr;
 		}
+		
+		public String toString() {
+			return "Left: (" + left.x + ", " + left.y + "), Right: (" + right.x + ", " + right.y + "), Length : " + length + ", " + deadLeft +  ", " + deadRight;
+		}
 	}

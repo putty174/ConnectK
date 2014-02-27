@@ -122,20 +122,19 @@ public class GameSearcher {
 		for (int k = state.kLength; k > 0; k--) {
 			for(List<Chain> l : myChains.values()) {
 				for(Chain c : l) {
-					if(!c.deadLeft && !c.deadRight && c.length == k)
 						result += c.length * 100^k^k;
 				}
 			}
 			for(List<Chain> l : enemyChains.values()) {
 				for(Chain c : l) {
-					if(!c.deadLeft && !c.deadRight && c.length == k)
-						result -= c.length * 100^k^k;
+					if(c.deadLeft && c.deadRight)
+						result += c.length * 100^k^k;
+					else if(c.deadLeft || c.deadRight)
+						result += c.length * 100^k;
 				}
 			}
 		}
 		//System.out.println("Move: (" + state.lastMove.x + "," + state.lastMove.y + ")\tEval: " + result);
 		return result;
 	}
-	
-	
 }
