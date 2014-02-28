@@ -30,25 +30,41 @@ public class HelperFunctions {
 		
 		for(Point p : newChains.keySet())	{
 			for(Chain c : newChains.get(p)) {
-				while(!c.deadLeft && isValid(state, c.left.x, c.left.y) && state.pieces[c.left.x][c.left.y] == TeamMaybeAI.enemy)
-					continueEnemyLeft(state, c);
-				while(!c.deadRight && isValid(state, c.right.x, c.right.y) && state.pieces[c.right.x][c.right.y] == TeamMaybeAI.enemy)
-					continueEnemyRight(state, c);
+				while(!c.deadLeft && isValid(state, c.left.x, c.left.y)) {
+					if(state.pieces[c.left.x][c.left.y] == TeamMaybeAI.enemy)
+						continueEnemyLeft(state, c);
+					else if(state.pieces[c.left.x][c.left.y] == TeamMaybeAI.player)
+						c.deadLeft = true;
+				}
+				while(!c.deadRight && isValid(state, c.right.x, c.right.y)) {
+					if(state.pieces[c.right.x][c.right.y] == TeamMaybeAI.enemy)
+						continueEnemyRight(state, c);
+					else if(state.pieces[c.right.x][c.right.y] == TeamMaybeAI.player)
+						c.deadRight = true;
+				}
 			}
 		}
 		return newChains;
 	}
 	
-	public Map<Point, List<Chain>> addMyChains(BoardModel board, Map<Point,List<Chain>> chains) {
+	public Map<Point, List<Chain>> addMyChains(BoardModel state, Map<Point,List<Chain>> chains) {
 		Map<Point, List<Chain>> newChains = new HashMap<Point, List<Chain>>(chains);
-		newMyChains(board, newChains);
+		newMyChains(state, newChains);
 		
-		for(Point p : newChains.keySet())	{
+		for(Point p : newChains.keySet()){
 			for(Chain c : newChains.get(p)) {
-				while(!c.deadLeft && isValid(board, c.left.x, c.left.y) && board.pieces[c.left.x][c.left.y] == TeamMaybeAI.player)
-					continueMyLeft(board, c);
-				while(!c.deadRight && isValid(board, c.right.x, c.right.y) && board.pieces[c.right.x][c.right.y] == TeamMaybeAI.player)
-					continueMyRight(board, c);
+				while(!c.deadLeft && isValid(state, c.left.x, c.left.y)) {
+					if(state.pieces[c.left.x][c.left.y] == TeamMaybeAI.player)
+						continueMyLeft(state, c);
+					else if(state.pieces[c.left.x][c.left.y] == TeamMaybeAI.enemy)
+						c.deadLeft = true;
+				}
+				while(!c.deadRight && isValid(state, c.right.x, c.right.y)) {
+					if(state.pieces[c.right.x][c.right.y] == TeamMaybeAI.player)
+						continueMyRight(state, c);
+					else if(state.pieces[c.right.x][c.right.y] == TeamMaybeAI.enemy)
+						c.deadRight = true;
+				}
 			}
 		}
 		return newChains;
