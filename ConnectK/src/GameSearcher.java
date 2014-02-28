@@ -73,17 +73,16 @@ public class GameSearcher {
 	 */
 	private int maxValue(BoardModel state, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth){
 		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
-		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
 		Map<Point, List<Chain>> currentEnemyChains = helper.addEnemyChains(state, enemyChains);
 		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
-			return eval(state, myChains, enemyChains);
+			return eval(state, myChains, currentEnemyChains);
 		}
 		int value = Integer.MIN_VALUE;
 		
 		for(Point move:moves){
 			BoardModel c = state.clone();
 			c = c.placePiece(move, TeamMaybeAI.player);
-			value = Math.max(value, minValue(c, currentRelevantMoves, currentMyChains, currentEnemyChains, depth + 1));
+			value = Math.max(value, minValue(c, currentRelevantMoves, myChains, currentEnemyChains, depth + 1));
 			if(value >= b){
 				return value;
 			}
@@ -99,16 +98,15 @@ public class GameSearcher {
 	private int minValue(BoardModel state, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth) {
 		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
 		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
-		Map<Point, List<Chain>> currentEnemyChains = helper.addEnemyChains(state, enemyChains);
 		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
-			return eval(state, myChains, enemyChains);
+			return eval(state, currentMyChains, enemyChains);
 		}
 		int value = Integer.MAX_VALUE;
 
 		for(Point move:moves){
 			BoardModel c = state.clone();
 			c = c.placePiece(move, TeamMaybeAI.enemy);
-			value = Math.min(value, maxValue(c, currentRelevantMoves, currentMyChains, currentEnemyChains, depth + 1));
+			value = Math.min(value, maxValue(c, currentRelevantMoves, currentMyChains, enemyChains, depth + 1));
 			if(value <= a){
 				return value;
 			}
