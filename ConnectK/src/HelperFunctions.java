@@ -30,13 +30,13 @@ public class HelperFunctions {
 		
 		for(Point p : newChains.keySet())	{
 			for(Chain c : newChains.get(p)) {
-				while(!c.deadLeft && isValid(state, c.left.x, c.left.y)) {
+				while(!c.deadLeft && isValid(state, c.left.x, c.left.y) && state.pieces[c.left.x][c.left.y] != 0) {
 					if(state.pieces[c.left.x][c.left.y] == TeamMaybeAI.enemy)
 						continueEnemyLeft(state, c);
 					else if(state.pieces[c.left.x][c.left.y] == TeamMaybeAI.player)
 						c.deadLeft = true;
 				}
-				while(!c.deadRight && isValid(state, c.right.x, c.right.y)) {
+				while(!c.deadRight && isValid(state, c.right.x, c.right.y) && state.pieces[c.right.x][c.right.y] != 0) {
 					if(state.pieces[c.right.x][c.right.y] == TeamMaybeAI.enemy)
 						continueEnemyRight(state, c);
 					else if(state.pieces[c.right.x][c.right.y] == TeamMaybeAI.player)
@@ -53,13 +53,13 @@ public class HelperFunctions {
 		
 		for(Point p : newChains.keySet()){
 			for(Chain c : newChains.get(p)) {
-				while(!c.deadLeft && isValid(state, c.left.x, c.left.y)) {
+				while(!c.deadLeft && isValid(state, c.left.x, c.left.y) && state.pieces[c.left.x][c.left.y] != 0) {
 					if(state.pieces[c.left.x][c.left.y] == TeamMaybeAI.player)
 						continueMyLeft(state, c);
 					else if(state.pieces[c.left.x][c.left.y] == TeamMaybeAI.enemy)
 						c.deadLeft = true;
 				}
-				while(!c.deadRight && isValid(state, c.right.x, c.right.y)) {
+				while(!c.deadRight && isValid(state, c.right.x, c.right.y) && state.pieces[c.right.x][c.right.y] != 0) {
 					if(state.pieces[c.right.x][c.right.y] == TeamMaybeAI.player)
 						continueMyRight(state, c);
 					else if(state.pieces[c.right.x][c.right.y] == TeamMaybeAI.enemy)
