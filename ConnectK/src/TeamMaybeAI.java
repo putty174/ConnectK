@@ -49,6 +49,12 @@ public class TeamMaybeAI extends CKPlayer {
 	}
 	
 	//"main decision function that does have a deadline
+	/*
+	 * Begins by taking timer, then using iterative deepening search
+	 * until deadline becomes true. If the deadline is reached while searching,
+	 * the any results found in the current IDS iteration are discarded in favour of
+	 * the results from the previous iteration.
+	 */
 	@Override
 	public Point getMove(BoardModel state, int deadline) {
 		start = System.currentTimeMillis();
@@ -74,28 +80,16 @@ public class TeamMaybeAI extends CKPlayer {
 		return makeMove();
 	}
 	
-	//If we're first, automatically make this move
+	//If we're first, automatically make this move closest to the centre of the board.
 	private Point firstMove(BoardModel state) {
 		return new Point((state.getWidth() - 1) / 2,(state.getHeight() - 1) / 2);
 	}
 	
-	//Otherwise, think about what move to make
-	private Point ids(BoardModel state, int depth) {
-		Point move = dumbMove(state);
-		
-		return move;
-	}
 	
 	private HashSet<Point> readBoard() {
 		addEnemyRelaventMoves();
 		addEnemyChains();
 		return futureRelaventMoves;
-	}
-	
-	//Call whenever to check if we still have time
-	private boolean checkTime(long start, int deadline) {
-		long end = System.currentTimeMillis();
-		return (end - start) < (deadline * 0.95 * 1000);
 	}
 	
 	//Build the enemy list of moves that are 8 way adjacent to tiles already filled

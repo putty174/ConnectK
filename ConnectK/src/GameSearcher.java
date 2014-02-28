@@ -9,27 +9,42 @@ public class GameSearcher {
 	HelperFunctions helper;
 	long start;
 	int deadline;
-	Point bestMove;
+	Point bestMove; //current best move
 	int bestValue = Integer.MIN_VALUE;
-	int a;
-	int b;
+	int a; // alpha
+	int b; // beta
 	
 	
 	public GameSearcher(){
 		helper = new HelperFunctions();
 	}
-	
-	// alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value found
-	// via alpha-beta pruning and some given evaluation function.
+	/*
+	 * alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value 
+	 * found via a depth-limited search alpha-beta pruning and some given evaluation function.
+	 */
 	public Point alphaBetaSearch(BoardModel state, int deadline, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int maxDepth){
 		int depth = 0;
 		this.deadline = deadline;
-		// Timer needs to be implemented better, preferably within maxValue and minValue
-		// Also this doesn't make use of the deadline variable. Bad practice
-		// Also needs global access to timer and deadline from main file
 		int best = Integer.MIN_VALUE;
 		depth = 0;
 		System.out.println("Depth: " + maxDepth);
+		/*
+		 * For each move we can make, see what the WORST-CASE scenario is.
+		 * In the end, we define our BEST-CASE move as the one with the best WORST-CASE.
+		 * The board is cloned; the move is made on the cloned board; THEN the cloned board is passed down.
+		 */
+		System.out.println("AI CHAINS:");
+		for(List<Chain> chain:myChains.values()){
+			for(Chain c:chain){
+				System.out.println(c.toString());
+			}
+		}
+		System.out.println("ENEMY CHAINS:");
+		for(List<Chain> chain:enemyChains.values()){
+			for(Chain c:chain){
+				System.out.println(c.toString());
+			}
+		}
 		for(Point move:moves){
 			a = Integer.MIN_VALUE;
 			b = Integer.MAX_VALUE;
@@ -45,32 +60,15 @@ public class GameSearcher {
 				System.out.println("NEW KING OF MOVES: " + best + "; which is " + bestMove);
 			}
 		}
-		/*
-		while(!timesUp()){
-			depth = 0;
-			maxDepth++;
-			System.out.println("Depth: " + maxDepth);
-			best = maxValue(state, Integer.MIN_VALUE, Integer.MAX_VALUE, moves, myChains, enemyChains, depth, maxDepth);
-			System.out.println("Best: " + best);
-		}
-		for(Point move:moves){
-			BoardModel c = state.clone();
-			c.placePiece(move, TeamMaybeAI.player);
-			int val = eval(c, myChains, enemyChains);
-			//System.out.println("Move: (" + move.x + "," + move.y + ")");
-			if(val > bestValue) {
-				bestValue = val;
-				bestMove = new Point(move);
-			}
-			if(state.pieces[move.x][move.y] == 0 && val == best) {
-				return move;
-			}
-		}
-		*/
 		return bestMove;
 	}
 	
-	// Part of alpha-beta pruning algorithm
+	/*
+	 * maxValue is used for moves made from our perspective.
+	 * We have received a cloned board from some higher call with the enemy's move already made.
+	 * First, we update relevant moves and chains; then, we do terminal tests and evaluate if
+	 * the state is a leaf node (maximum depth or game-over).
+	 */
 	private int maxValue(BoardModel state, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth, int maxDepth){
 		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
 		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
@@ -89,11 +87,13 @@ public class GameSearcher {
 			}
 			a = Math.max(a, value);
 		}
-		//System.out.println("Max Value: " + value);
 		return value;
 	}
 	
-	// Part of alpha-beta pruning algorithm
+	/*
+	 * Essentially identical to maxValue, except inverse, as it is from the
+	 * opponent's perspective.
+	 */
 	private int minValue(BoardModel state, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth, int maxDepth) {
 		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
 		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
@@ -112,7 +112,6 @@ public class GameSearcher {
 			}
 			b = Math.min(b, value);
 		}
-		//System.out.println("Min Value: " + value);
 		return value;
 	}
 	
@@ -122,15 +121,15 @@ public class GameSearcher {
 		for (int k = state.kLength; k > 0; k--) {
 			for(List<Chain> l : myChains.values()) {
 				for(Chain c : l) {
-						result += c.length * 100^k^k;
+						result += c.length * 2^k^k;
 				}
 			}
 			for(List<Chain> l : enemyChains.values()) {
 				for(Chain c : l) {
 					if(c.deadLeft && c.deadRight)
-						result += c.length * 100^k^k;
+						result += c.length * 2^k^k;
 					else if(c.deadLeft || c.deadRight)
-						result += c.length * 100^k;
+						result += c.length * 2^k;
 				}
 			}
 		}
