@@ -1,4 +1,5 @@
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,6 @@ public class GameSearcher {
 	int a; // alpha
 	int b; // beta
 	int maxDepth;
-	
 	
 	public GameSearcher(){
 		helper = new HelperFunctions();
@@ -35,6 +35,8 @@ public class GameSearcher {
 		 * In the end, we define our BEST-CASE move as the one with the best WORST-CASE.
 		 * The board is cloned; the move is made on the cloned board; THEN the cloned board is passed down.
 		 */
+		
+		// DEBUG
 		System.out.println("AI CHAINS:");
 		for(List<Chain> chain:myChains.values()){
 			for(Chain c:chain){
@@ -47,6 +49,7 @@ public class GameSearcher {
 				System.out.println(c.toString());
 			}
 		}
+		// END DEBUG
 		for(Point move:moves){
 			a = Integer.MIN_VALUE;
 			b = Integer.MAX_VALUE;
@@ -135,5 +138,39 @@ public class GameSearcher {
 		}
 		//System.out.println("Move: (" + state.lastMove.x + "," + state.lastMove.y + ")\tEval: " + result);
 		return result;
+	}
+	
+	private int eval(BoardModel state){
+		int result = 0;
+		ArrayList<HashSet<Point>> ourChains = new ArrayList<HashSet<Point>>();
+		ArrayList<HashSet<Point>> enemyChains = new ArrayList<HashSet<Point>>();
+		for(int i = 0; i < state.getWidth(); i++){
+			for(int j = 0; j < state.getHeight(); j++){
+				if(state.getSpace(i,j) == TeamMaybeAI.player){
+					// New x and y variables to prevent problems with the outer for-loops
+					int x = i;
+					int y = j;
+					HashSet<Point> chain73 = new HashSet<Point>();
+					HashSet<Point> chain46 = new HashSet<Point>();
+					HashSet<Point> chain19 = new HashSet<Point>();
+					HashSet<Point> chain28 = new HashSet<Point>();
+					chain73.add(new Point(x,y));
+					
+					while(state.getSpace(x-1, y+1) == TeamMaybeAI.player){
+						chain73.add(new Point(x-1, y+1));
+						x--;
+						y++;
+					}
+					while(state.getSpace(x+1, y-1) == TeamMaybeAI.player){
+						chain73.add(new Point(x-1, y+1));
+						x--;
+						y++;
+					}
+					
+					
+					
+				}
+			}
+		}
 	}
 }
