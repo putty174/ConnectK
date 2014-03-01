@@ -169,6 +169,7 @@ public class HelperFunctions {
 	}
 	
 	private void continueEnemyLeft(BoardModel board, Chain c) {
+		System.out.print(c.length + " -> ");
 		if(!c.deadLeft) {
 			int dx = c.right.x - c.left.x;
 			int dy = c.right.y - c.left.y;
@@ -188,6 +189,7 @@ public class HelperFunctions {
 				c.deadLeft = true;
 			}
 		}
+		System.out.println(c.length);
 	}
 	
 	private void continueMyLeft(BoardModel board, Chain c) {

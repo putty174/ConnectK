@@ -115,6 +115,70 @@ public class GameSearcher {
 		return value;
 	}
 	
+	private int eval2(BoardModel state) {
+		int result = 0;
+		
+		int currentPiece;
+		int length;
+		int posX, posY;
+		
+		for(int i = 0; i < state.width; i++) {
+			for(int j = 0; j < state.height; j++) {
+				if(state.pieces[i][j] != 0) {
+					length = 0;
+					currentPiece = state.pieces[i][j];
+					posX = i;
+					posY = j;
+					
+					//For loop counts diagonal left-up/down-right, then up/down, then diagonal left-down/up-right
+					for(int x = -1; x < 2; x++) {
+						while(state.pieces[posX+x][posY-1] == currentPiece) {
+							length++;
+							posX+=x;
+							posY-=1;
+						}
+						posX = i;
+						posY = j;
+						while(state.pieces[posX-x][posY+1] == currentPiece) {
+							length++;
+							posX-=x;
+							posY+=1;
+						}
+						if(currentPiece == TeamMaybeAI.player) {
+							result = 2^length;
+						}
+						else if(currentPiece == TeamMaybeAI.enemy) {
+							
+						}
+					}
+					
+					//This chunk counts left/right
+					length = 0;
+					posX = i;
+					posY = j;
+					while(state.pieces[posX-1][posY] == currentPiece) {
+						length++;
+						posX-=1;
+					}
+					posX = i;
+					posY = j;
+					while(state.pieces[posX+1][posY] == currentPiece) {
+						length++;
+						posX+=1;
+					}
+					if(currentPiece == TeamMaybeAI.player) {
+						result = 2^length;
+					}
+					else if(currentPiece == TeamMaybeAI.enemy) {
+						
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
 
 	private int eval(BoardModel state, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains) {
 		int result = 0;
