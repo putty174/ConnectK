@@ -65,7 +65,6 @@ public class TeamMaybeAI extends CKPlayer {
 			readBoard();
 			int maxDepth = 0;
 			Point tempMove;
-			System.out.println(relaventMoves.toString());
 			while(!timesUp(deadline)){
 				maxDepth++;
 				tempMove = GS.alphaBetaSearch(board, deadline, relaventMoves, myChains, enemyChains, maxDepth);
@@ -73,7 +72,7 @@ public class TeamMaybeAI extends CKPlayer {
 					move = tempMove;
 				}
 				else{
-					System.out.println("DEADLINE");
+					//System.out.println("DEADLINE");
 				}
 			}
 		}
