@@ -213,3 +213,6 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+TestEnvironment/src/TestEnvironment.java
+TestEnvironment/src/Node.java
+TestEnvironment/src/Searcher.java
