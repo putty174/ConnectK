@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import connectK.BoardModel;
 
@@ -15,6 +16,7 @@ public class GameSearcher {
 	int a; // alpha
 	int b; // beta
 	int maxDepth;
+	TreeMap<Integer, Point> moves = new TreeMap<Integer, Point>();
 
 	public GameSearcher(){
 		helper = new HelperFunctions();
@@ -110,7 +112,6 @@ public class GameSearcher {
 		}
 		return value;
 	}
-<<<<<<< HEAD
 	
 	private int eval2(BoardModel state) {
 		int result = 0;
@@ -172,12 +173,8 @@ public class GameSearcher {
 				}
 			}
 		}
-		
 		return result;
 	}
-	
-=======
->>>>>>> origin/PhongEval
 
 	private int eval(BoardModel state){
 		int result = 0;
@@ -212,7 +209,7 @@ public class GameSearcher {
 		for(HashSet<Point> chain:enemyChains){
 			result -= chain.size()^2;
 		}		
-		
+		moves.put(result, state.lastMove);
 		return result;
 	}
 
