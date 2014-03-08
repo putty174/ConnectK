@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public class TeamMaybeAI extends CKPlayer {
-	public static byte player;
-	public static byte enemy;
+	public static  byte player;
+	public static  byte enemy;
 	private BoardModel board; //The BoardModel state so we don't have to pass this everywhere
 	private HashSet<Point> relaventMoves = new HashSet<Point>(); //A list of empty spots 8 way adjacent to already placed pieces
 	
@@ -72,10 +72,9 @@ public class TeamMaybeAI extends CKPlayer {
 					move = tempMove;
 				}
 				else{
-					System.out.println("DEADLINE");
+					//System.out.println("DEADLINE");
 				}
 			}
-			
 		}
 		return makeMove();
 	}
