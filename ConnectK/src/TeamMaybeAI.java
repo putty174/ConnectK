@@ -1,17 +1,19 @@
 import connectK.CKPlayer;
 import connectK.BoardModel;
 import java.awt.Point;
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class TeamMaybeAI extends CKPlayer {
 	public static  byte player;
 	public static  byte enemy;
 	private BoardModel board; //The BoardModel state so we don't have to pass this everywhere
-	private HashSet<Point> relaventMoves = new HashSet<Point>(); //A list of empty spots 8 way adjacent to already placed pieces
+	private TreeMap<Integer, BoardModel> relaventMoves = new TreeMap<Integer, BoardModel>(); //A list of empty spots 8 way adjacent to already placed pieces
 	
 	private Player me;
 	private Player oppoenent;
@@ -102,7 +104,7 @@ public class TeamMaybeAI extends CKPlayer {
 					x = board.lastMove.x + i;
 					y = board.lastMove.y + j;
 					if (isEmpty(x,y))
-						relaventMoves.add(new Point(x,y));
+						relaventMoves.put(0,board.clone().placePiece(new Point(x, y),enemy));
 				}
 	}
 	
@@ -116,15 +118,15 @@ public class TeamMaybeAI extends CKPlayer {
 					x = move.x + i;
 					y = move.y + j;
 					if (isEmpty(x,y))
-						relaventMoves.add(new Point(x,y));
+						relaventMoves.put(0,board.clone().placePiece(new Point(x, y),player));
 				}
 	}
 	
 	//Removes any already used moves by both players
 		private void removeIrrelaventMoves() {
-			if(relaventMoves.contains(board.lastMove))
+			if(relaventMoves.containsValue(board.lastMove))
 				relaventMoves.remove(board.lastMove);
-			if(relaventMoves.contains(move))
+			if(relaventMoves.containsValue(move))
 				relaventMoves.remove(move);
 		}
 	
@@ -386,8 +388,8 @@ public class TeamMaybeAI extends CKPlayer {
 	//Prints all relevant moves
 	private void printRelaventMoves() {
 		System.out.println();
-		for(Point p : relaventMoves)
-			System.out.println("All relavent moves: " + p.x + ", " + p.y);
+		for(BoardModel p : relaventMoves.values())
+			System.out.println("All relavent moves: " + p.lastMove.x + ", " + p.lastMove.y);
 	}
 	
 	private void printEnemyChains() {

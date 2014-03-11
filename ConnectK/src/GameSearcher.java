@@ -16,7 +16,8 @@ public class GameSearcher {
 	int a; // alpha
 	int b; // beta
 	int maxDepth;
-	TreeMap<Integer, Point> moves = new TreeMap<Integer, Point>();
+	TreeMap<Integer, BoardModel> moves = new TreeMap<Integer, BoardModel>();
+	TreeMap<Integer, BoardModel> lastMoves = new TreeMap<Integer, BoardModel>();
 
 	public GameSearcher(){
 		helper = new HelperFunctions();
@@ -209,7 +210,7 @@ public class GameSearcher {
 		for(HashSet<Point> chain:enemyChains){
 			result -= chain.size()^2;
 		}		
-		moves.put(result, state.lastMove);
+		moves.put(result, state.clone());
 		return result;
 	}
 
