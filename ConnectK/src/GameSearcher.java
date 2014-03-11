@@ -26,8 +26,9 @@ public class GameSearcher {
 	 * alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value 
 	 * found via a depth-limited search alpha-beta pruning and some given evaluation function.
 	 */
-	public Point alphaBetaSearch(BoardModel state, int deadline, int maxDepth){
+	public Point alphaBetaSearch(BoardModel state, TreeMap<Integer, BoardModel> m, int deadline, int maxDepth){
 		int depth = 0;
+		moves = m;
 		this.deadline = deadline;
 		int best = Integer.MIN_VALUE;
 		depth = 0;
@@ -37,6 +38,12 @@ public class GameSearcher {
 		 * In the end, we define our BEST-CASE move as the one with the best WORST-CASE.
 		 * The board is cloned; the move is made on the cloned board; THEN the cloned board is passed down.
 		 */
+		
+		for(BoardModel b : moves.values()){
+			int thisMoveValue = minValue(c, depth);
+		}
+		
+		lastMoves = moves;
 
 		for(int i = 0; i < state.getWidth(); i++){
 			for(int j = 0; j < state.getHeight(); j++){
@@ -52,7 +59,9 @@ public class GameSearcher {
 						best = thisMoveValue;
 						bestMove = new Point(i,j);
 					}
+					
 				}
+				
 			}
 		}
 		return bestMove;

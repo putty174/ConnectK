@@ -62,7 +62,7 @@ public class TeamMaybeAI extends CKPlayer {
 			Point tempMove;
 			while(!timesUp(deadline)){
 				maxDepth++;
-				tempMove = GS.alphaBetaSearch(board, deadline, maxDepth);
+				tempMove = GS.alphaBetaSearch(board, relaventMoves, deadline, maxDepth);
 				if(tempMove != null){
 					move = tempMove;
 				}
