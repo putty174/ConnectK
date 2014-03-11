@@ -214,5 +214,10 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 TestEnvironment/src/TestEnvironment.java
+<<<<<<< HEAD
 TestEnvironment/src/Node.java
 TestEnvironment/src/Searcher.java
+=======
+TestEnvironment/src/Searcher.java
+TestEnvironment/src/Node.java
+>>>>>>> Having git ignore files not relevant to the project.
