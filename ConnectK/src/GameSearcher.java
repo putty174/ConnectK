@@ -68,7 +68,7 @@ public class GameSearcher {
 		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
 		Map<Point, List<Chain>> currentEnemyChains = helper.addEnemyChains(state, enemyChains);
 		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
-			return eval(state);
+			return eval(state, true);
 		}
 		int value = Integer.MIN_VALUE;
 
@@ -95,7 +95,7 @@ public class GameSearcher {
 		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
 		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
 		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
-			return eval(state);
+			return eval(state, false);
 		}
 		int value = Integer.MAX_VALUE;
 
@@ -177,7 +177,7 @@ public class GameSearcher {
 		return result;
 	}
 
-	private int eval(BoardModel state){
+	private int eval(BoardModel state, boolean isMax){
 		int result = 0;
 		if(state.winner() == TeamMaybeAI.player){
 			return Integer.MAX_VALUE;
@@ -198,6 +198,9 @@ public class GameSearcher {
 				else if(state.getSpace(i,j) == TeamMaybeAI.enemy){
 					ArrayList<HashSet<Point>> chains = generateChains(i, j, state, TeamMaybeAI.enemy);
 					for(HashSet<Point> chain:chains){
+						if(isMax && chain.size() > state.getkLength() - 2){
+							return maxValue(state, moves)
+						}
 						enemyChains.add(chain);
 					}
 				}
@@ -208,6 +211,9 @@ public class GameSearcher {
 		}
 		
 		for(HashSet<Point> chain:enemyChains){
+			if(chain.size() > state.getkLength() - 2){
+				
+			}
 			result -= chain.size()^2;
 		}		
 		moves.put(result, state.clone());
