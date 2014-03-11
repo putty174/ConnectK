@@ -26,7 +26,7 @@ public class GameSearcher {
 	 * alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value 
 	 * found via a depth-limited search alpha-beta pruning and some given evaluation function.
 	 */
-	public Point alphaBetaSearch(BoardModel state, int deadline, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int maxDepth){
+	public Point alphaBetaSearch(BoardModel state, int deadline, int maxDepth){
 		int depth = 0;
 		this.deadline = deadline;
 		int best = Integer.MIN_VALUE;
@@ -44,7 +44,7 @@ public class GameSearcher {
 					a = Integer.MIN_VALUE;
 					b = Integer.MAX_VALUE;
 					BoardModel c = state.placePiece(new Point(i,j), TeamMaybeAI.player);	
-					int thisMoveValue = minValue(c, moves, myChains, enemyChains, depth);
+					int thisMoveValue = minValue(c, depth);
 					if(TeamMaybeAI.timesUp(deadline)){
 						return null;
 					}
@@ -64,11 +64,9 @@ public class GameSearcher {
 	 * First, we update relevant moves and chains; then, we do terminal tests and evaluate if
 	 * the state is a leaf node (maximum depth or game-over).
 	 */
-	private int maxValue(BoardModel state, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth){
-		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
-		Map<Point, List<Chain>> currentEnemyChains = helper.addEnemyChains(state, enemyChains);
+	private int maxValue(BoardModel state, int depth){
 		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
-			return eval(state, true);
+			return eval(state, depth, true);
 		}
 		int value = Integer.MIN_VALUE;
 
@@ -76,7 +74,7 @@ public class GameSearcher {
 			for(int j = 0; j < state.getHeight(); j++){
 				if(state.getSpace(i,j) == 0){
 					BoardModel c = state.placePiece(new Point(i,j), TeamMaybeAI.player);
-					value = Math.max(value, minValue(c, currentRelevantMoves, myChains, currentEnemyChains, depth + 1));
+					value = Math.max(value, minValue(c, depth + 1));
 					if(value >= b){
 						return value;
 					}
@@ -91,11 +89,9 @@ public class GameSearcher {
 	 * Essentially identical to maxValue, except inverse, as it is from the
 	 * opponent's perspective.
 	 */
-	private int minValue(BoardModel state, HashSet<Point> moves, Map<Point, List<Chain>> myChains, Map<Point, List<Chain>> enemyChains, int depth) {
-		HashSet<Point> currentRelevantMoves = helper.relevantMoves(state, moves);
-		Map<Point, List<Chain>> currentMyChains = helper.addMyChains(state, myChains);
+	private int minValue(BoardModel state, int depth) {
 		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
-			return eval(state, false);
+			return eval(state, depth, false);
 		}
 		int value = Integer.MAX_VALUE;
 
@@ -103,7 +99,7 @@ public class GameSearcher {
 			for(int j = 0; j < state.getHeight(); j++){
 				if(state.getSpace(i,j) == 0){
 					BoardModel c = state.placePiece(new Point(i,j), TeamMaybeAI.enemy);
-					value = Math.min(value, maxValue(c, currentRelevantMoves, currentMyChains, enemyChains, depth + 1));
+					value = Math.min(value, maxValue(c, depth + 1));
 					if(value <= a){
 						return value;
 					}
@@ -177,7 +173,7 @@ public class GameSearcher {
 		return result;
 	}
 
-	private int eval(BoardModel state, boolean isMax){
+	private int eval(BoardModel state, int depth, boolean isMax){
 		int result = 0;
 		if(state.winner() == TeamMaybeAI.player){
 			return Integer.MAX_VALUE;
@@ -198,8 +194,8 @@ public class GameSearcher {
 				else if(state.getSpace(i,j) == TeamMaybeAI.enemy){
 					ArrayList<HashSet<Point>> chains = generateChains(i, j, state, TeamMaybeAI.enemy);
 					for(HashSet<Point> chain:chains){
-						if(isMax && chain.size() > state.getkLength() - 2){
-							return maxValue(state, moves)
+						if(!isMax && chain.size() > state.getkLength() - 2){	//Quiescence test
+							return minValue(state, depth - 1);
 						}
 						enemyChains.add(chain);
 					}

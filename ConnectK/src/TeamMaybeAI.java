@@ -1,7 +1,6 @@
 import connectK.CKPlayer;
 import connectK.BoardModel;
 import java.awt.Point;
-import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,17 +13,13 @@ public class TeamMaybeAI extends CKPlayer {
 	public static  byte enemy;
 	private BoardModel board; //The BoardModel state so we don't have to pass this everywhere
 	private TreeMap<Integer, BoardModel> relaventMoves = new TreeMap<Integer, BoardModel>(); //A list of empty spots 8 way adjacent to already placed pieces
-	
-	private Player me;
-	private Player oppoenent;
+
 	
 	private Map<Point, List<Chain>> myChains = new HashMap<Point, List<Chain>>(); //An array of maps for our chains
 	private Map<Point, List<Chain>> enemyChains = new HashMap<Point, List<Chain>>(); //An array of maps for enemy chains
-	
-	private BoardModel futureBoard;
+
 	private HashSet<Point> futureRelaventMoves = new HashSet<Point>();
-	private Map<Point, List<Chain>> futureMyChains = new HashMap<Point, List<Chain>>();
-	private Map<Point, List<Chain>> futureEnemyChains = new HashMap<Point, List<Chain>>();
+
 	private Point move; //The move we want to make
 	
 	private static long start; //A timer to track when our turn started
@@ -40,8 +35,6 @@ public class TeamMaybeAI extends CKPlayer {
 			enemy = 2;
 		else
 			enemy = 1;
-		me = new Player(player);
-		oppoenent = new Player(enemy);
 	}
 	
 	//"main" decision function that doesn't have a deadline
@@ -69,7 +62,7 @@ public class TeamMaybeAI extends CKPlayer {
 			Point tempMove;
 			while(!timesUp(deadline)){
 				maxDepth++;
-				tempMove = GS.alphaBetaSearch(board, deadline, relaventMoves, myChains, enemyChains, maxDepth);
+				tempMove = GS.alphaBetaSearch(board, deadline, maxDepth);
 				if(tempMove != null){
 					move = tempMove;
 				}
@@ -386,28 +379,6 @@ public class TeamMaybeAI extends CKPlayer {
 	}
 	
 	//Prints all relevant moves
-	private void printRelaventMoves() {
-		System.out.println();
-		for(BoardModel p : relaventMoves.values())
-			System.out.println("All relavent moves: " + p.lastMove.x + ", " + p.lastMove.y);
-	}
-	
-	private void printEnemyChains() {
-		for(List<Chain> l : enemyChains.values())
-			for(Chain c : l) {
-				System.out.println("Left: " + c.left + " \t Right: " + c.right + "\t Length: " + c.length);
-			}
-	}
-	
-	//Until we have an actual AI to test, just choose the far left bottom spot
-	private Point dumbMove(BoardModel state) {
-		for(int i = 0; i < state.width; i++)
-			for(int j = 0; j < state.height; j++)
-				if(state.pieces[i][j] == 0)
-					return new Point(i,j);
-		return null;
-	}
-	
 	public static boolean timesUp(int deadline) {
 		return (deadline * 0.4 < System.currentTimeMillis() - start);
 	}
