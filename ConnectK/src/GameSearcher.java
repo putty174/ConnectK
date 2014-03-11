@@ -39,6 +39,8 @@ public class GameSearcher {
 		 * The board is cloned; the move is made on the cloned board; THEN the cloned board is passed down.
 		 */
 		
+		//WARNING: TreeMaps sort from least to greatest. Remember to traverse backwards
+		
 		for(BoardModel b : moves.values()){
 			int thisMoveValue = minValue(c, depth);
 		}
