@@ -23,7 +23,45 @@ public class HelperFunctions {
 				}
 		return list;
 	}
-	
+	public static ArrayList<Point> generateRelevantMoves(BoardModel state) {
+		byte player;
+		ArrayList<Point> rMoves = new ArrayList<Point>();
+		if(state.getSpace(state.lastMove) == 1){
+			player = 2;
+		}
+		else{
+			player = 1;
+		}
+		if(state.gravityEnabled()){
+			for(int i = 0; i < state.getWidth(); i++){
+				for(int j = 0; j < state.getHeight(); j++){
+					if(state.getSpace(i, j) == 0){
+						rMoves.add(new Point(i,j));
+						break;
+					}
+				}
+			}
+		}
+		else{
+			for(int i = 0; i < state.getWidth(); i++){
+				for(int j = 0; j < state.getHeight(); j++){
+					if(state.getSpace(i, j) == 0 &&(
+							(i > 0 && state.getSpace(i - 1, j) != 0) ||	// spot in direction 4 is NOT empty
+							(i > 0 && j > 0 && state.getSpace(i - 1, j - 1) != 0) || //spot in direction 1 is NOT empty
+							(j > 0 && state.getSpace(i, j - 1) != 0) || // spot in direction 2 is NOT empty
+							(i < state.getWidth() - 1 && j > 0 && state.getSpace(i + 1, j - 1) != 0) || // spot in direction 3 is NOT empty
+							(i < state.getWidth() - 1 && state.getSpace(i + 1, j) != 0) || // spot in direction 6 is NOT empty
+							(i < state.getWidth() - 1 && j < state.getHeight() - 1 && state.getSpace(i + 1, j + 1) != 0) || // spot in direction 9 is NOT empty
+							(j < state.getHeight() - 1 && state.getSpace(i, j + 1) != 0) || // spot in direction 8 is NOT empty
+							(i > 0 && j < state.getHeight() - 1 && state.getSpace(i - 1, j + 1) != 0) // spot in direction 7 is NOT empty
+							)){
+						rMoves.add(new Point(i,j));
+					}
+				}
+			}
+		}
+		return rMoves;
+	}
 	public Map<Point, List<Chain>> addEnemyChains(BoardModel state, Map<Point,List<Chain>> chains) {
 		Map<Point, List<Chain>> newChains = new HashMap<Point, List<Chain>>(chains);
 		newEnemyChains(state, newChains);

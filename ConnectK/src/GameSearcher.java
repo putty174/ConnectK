@@ -38,32 +38,26 @@ public class GameSearcher {
 		 * In the end, we define our BEST-CASE move as the one with the best WORST-CASE.
 		 * The board is cloned; the move is made on the cloned board; THEN the cloned board is passed down.
 		 */
-		
-		//WARNING: TreeMaps sort from least to greatest. Remember to traverse backwards
-		
-		//for(BoardModel b : moves.values()){
-	//		int thisMoveValue = minValue(c, depth);
-	//	}
-		
-		lastMoves = moves;
 
-		for(int i = 0; i < state.getWidth(); i++){
-			for(int j = 0; j < state.getHeight(); j++){
-				if(state.getSpace(i,j) == 0){
-					a = Integer.MIN_VALUE;
-					b = Integer.MAX_VALUE;
-					BoardModel c = state.placePiece(new Point(i,j), TeamMaybeAI.player);	
-					int thisMoveValue = minValue(c, depth);
-					if(TeamMaybeAI.timesUp(deadline)){
-						return null;
-					}
-					if(best < thisMoveValue){
-						best = thisMoveValue;
-						bestMove = new Point(i,j);
-					}
-					
-				}
-				
+		//WARNING: TreeMaps sort from least to greatest. Remember to traverse backwards
+
+		//for(BoardModel b : moves.values()){
+		//		int thisMoveValue = minValue(c, depth);
+		//	}
+
+		lastMoves = moves;
+		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		for(Point move:rMoves){
+			a = Integer.MIN_VALUE;
+			b = Integer.MAX_VALUE;
+			BoardModel c = state.placePiece(move, TeamMaybeAI.player);	
+			int thisMoveValue = minValue(c, depth);
+			if(TeamMaybeAI.timesUp(deadline)){
+				return null;
+			}
+			if(best < thisMoveValue){
+				best = thisMoveValue;
+				bestMove = move;
 			}
 		}
 		return bestMove;
@@ -81,17 +75,14 @@ public class GameSearcher {
 		}
 		int value = Integer.MIN_VALUE;
 
-		for(int i = 0; i < state.getWidth(); i++){
-			for(int j = 0; j < state.getHeight(); j++){
-				if(state.getSpace(i,j) == 0){
-					BoardModel c = state.placePiece(new Point(i,j), TeamMaybeAI.player);
-					value = Math.max(value, minValue(c, depth + 1));
-					if(value >= b){
-						return value;
-					}
-					a = Math.max(a, value);
-				}
+		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		for(Point move:rMoves){
+			BoardModel c = state.placePiece(move, TeamMaybeAI.player);
+			value = Math.max(value, minValue(c, depth + 1));
+			if(value >= b){
+				return value;
 			}
+			a = Math.max(a, value);
 		}
 		return value;
 	}
@@ -106,28 +97,25 @@ public class GameSearcher {
 		}
 		int value = Integer.MAX_VALUE;
 
-		for(int i = 0; i < state.getWidth(); i++){
-			for(int j = 0; j < state.getHeight(); j++){
-				if(state.getSpace(i,j) == 0){
-					BoardModel c = state.placePiece(new Point(i,j), TeamMaybeAI.enemy);
-					value = Math.min(value, maxValue(c, depth + 1));
-					if(value <= a){
-						return value;
-					}
-					b = Math.min(b, value);
-				}
-			}	
+		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		for(Point move:rMoves){
+			BoardModel c = state.placePiece(move, TeamMaybeAI.enemy);
+			value = Math.min(value, maxValue(c, depth + 1));
+			if(value <= a){
+				return value;
+			}
+			b = Math.min(b, value);
 		}
 		return value;
 	}
-	
+
 	private int eval2(BoardModel state) {
 		int result = 0;
-		
+
 		int currentPiece;
 		int length;
 		int posX, posY;
-		
+
 		for(int i = 0; i < state.width; i++) {
 			for(int j = 0; j < state.height; j++) {
 				if(state.pieces[i][j] != 0) {
@@ -135,7 +123,7 @@ public class GameSearcher {
 					currentPiece = state.pieces[i][j];
 					posX = i;
 					posY = j;
-					
+
 					//For loop counts diagonal left-up/down-right, then up/down, then diagonal left-down/up-right
 					for(int x = -1; x < 2; x++) {
 						while(state.pieces[posX+x][posY-1] == currentPiece) {
@@ -154,10 +142,10 @@ public class GameSearcher {
 							result = 2^length;
 						}
 						else if(currentPiece == TeamMaybeAI.enemy) {
-							
+
 						}
 					}
-					
+
 					//This chunk counts left/right
 					length = 0;
 					posX = i;
@@ -176,7 +164,7 @@ public class GameSearcher {
 						result = 2^length;
 					}
 					else if(currentPiece == TeamMaybeAI.enemy) {
-						
+
 					}
 				}
 			}
@@ -208,9 +196,9 @@ public class GameSearcher {
 				else if(state.getSpace(i,j) == TeamMaybeAI.enemy){
 					ArrayList<HashSet<Point>> chains = generateChains(i, j, state, TeamMaybeAI.enemy);
 					for(HashSet<Point> chain:chains){
-			//			if(!isMax && chain.size() > state.getkLength() - 2){	//Quiescence test
-			//				return minValue(state, depth - 1);
-			//			}
+						//			if(!isMax && chain.size() > state.getkLength() - 2){	//Quiescence test
+						//				return minValue(state, depth - 1);
+						//			}
 						enemyChains.add(chain);
 					}
 				}
@@ -219,10 +207,10 @@ public class GameSearcher {
 		for(HashSet<Point> chain:ourChains){
 			result += chain.size()^2;
 		}
-		
+
 		for(HashSet<Point> chain:enemyChains){
 			if(chain.size() > state.getkLength() - 2){
-				
+
 			}
 			result -= chain.size()^2;
 		}		

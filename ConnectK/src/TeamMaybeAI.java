@@ -380,6 +380,6 @@ public class TeamMaybeAI extends CKPlayer {
 	
 	//Prints all relevant moves
 	public static boolean timesUp(int deadline) {
-		return (deadline * 0.4 < System.currentTimeMillis() - start);
+		return (deadline * 0.8 < System.currentTimeMillis() - start);
 	}
 }
