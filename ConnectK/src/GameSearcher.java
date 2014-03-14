@@ -13,8 +13,8 @@ public class GameSearcher {
 	int deadline;
 	Point bestMove; //current best move
 	int bestValue = Integer.MIN_VALUE;
-	int a; // alpha
-	int b; // beta
+	int alpha;
+	int beta;
 	int maxDepth;
 	TreeMap<Integer, BoardModel> moves = new TreeMap<Integer, BoardModel>();
 	TreeMap<Integer, BoardModel> lastMoves = new TreeMap<Integer, BoardModel>();
@@ -26,6 +26,52 @@ public class GameSearcher {
 	 * alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value 
 	 * found via a depth-limited search alpha-beta pruning and some given evaluation function.
 	 */
+	
+	public Point minMaxSearch(BoardModel state, int deadline, int maxDepth){
+		int depth = 0;
+		this.deadline = deadline;
+		this.maxDepth = maxDepth;
+		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		Point bestMove = rMoves.get(0);
+		int best = Integer.MIN_VALUE;
+		for(Point move:rMoves){
+			int temp = minValue(state.placePiece(move, TeamMaybeAI.player), depth + 1);
+			if(temp > best){
+				bestMove = move;
+				best = temp;
+			}
+		}
+		if(bestMove == null || state.getSpace(bestMove) != 0){
+			bestMove = rMoves.get(0);
+		}
+		return bestMove;
+	}
+	
+	private int maxValue(BoardModel state, int depth){
+		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
+			return eval(state, depth, true);
+		}
+		int value = Integer.MIN_VALUE;
+		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		for(Point move:rMoves){
+			value = Math.max(value, minValue(state.placePiece(move, TeamMaybeAI.player), depth + 1));
+		}
+		return value;
+	}
+	
+	private int minValue(BoardModel state, int depth) {
+		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
+			return eval(state, depth, true);
+		}
+		
+		int value = Integer.MAX_VALUE;
+		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		for(Point move:rMoves){
+			value = Math.min(value, maxValue(state.placePiece(move, TeamMaybeAI.enemy), depth + 1));
+		}
+		return value;
+	}
+
 	public Point alphaBetaSearch(BoardModel state, TreeMap<Integer, BoardModel> m, int deadline, int maxDepth){
 		int depth = 0;
 		moves = m;
@@ -47,11 +93,12 @@ public class GameSearcher {
 
 		lastMoves = moves;
 		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		alpha = Integer.MIN_VALUE;
+		beta = Integer.MAX_VALUE;
 		for(Point move:rMoves){
-			a = Integer.MIN_VALUE;
-			b = Integer.MAX_VALUE;
+			
 			BoardModel c = state.placePiece(move, TeamMaybeAI.player);	
-			int thisMoveValue = minValue(c, depth);
+			int thisMoveValue = minValue(c, depth, alpha, beta);
 			if(TeamMaybeAI.timesUp(deadline)){
 				return null;
 			}
@@ -69,7 +116,7 @@ public class GameSearcher {
 	 * First, we update relevant moves and chains; then, we do terminal tests and evaluate if
 	 * the state is a leaf node (maximum depth or game-over).
 	 */
-	private int maxValue(BoardModel state, int depth){
+	private int maxValue(BoardModel state, int depth, int a, int b){
 		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
 			return eval(state, depth, true);
 		}
@@ -78,7 +125,7 @@ public class GameSearcher {
 		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
 		for(Point move:rMoves){
 			BoardModel c = state.placePiece(move, TeamMaybeAI.player);
-			value = Math.max(value, minValue(c, depth + 1));
+			value = Math.max(value, minValue(c, depth + 1, a, b));
 			if(value >= b){
 				return value;
 			}
@@ -91,7 +138,7 @@ public class GameSearcher {
 	 * Essentially identical to maxValue, except inverse, as it is from the
 	 * opponent's perspective.
 	 */
-	private int minValue(BoardModel state, int depth) {
+	private int minValue(BoardModel state, int depth, int a, int b) {
 		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
 			return eval(state, depth, false);
 		}
@@ -100,7 +147,7 @@ public class GameSearcher {
 		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
 		for(Point move:rMoves){
 			BoardModel c = state.placePiece(move, TeamMaybeAI.enemy);
-			value = Math.min(value, maxValue(c, depth + 1));
+			value = Math.min(value, maxValue(c, depth + 1, a, b));
 			if(value <= a){
 				return value;
 			}

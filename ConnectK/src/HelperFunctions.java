@@ -24,14 +24,7 @@ public class HelperFunctions {
 		return list;
 	}
 	public static ArrayList<Point> generateRelevantMoves(BoardModel state) {
-		byte player;
 		ArrayList<Point> rMoves = new ArrayList<Point>();
-		if(state.getSpace(state.lastMove) == 1){
-			player = 2;
-		}
-		else{
-			player = 1;
-		}
 		if(state.gravityEnabled()){
 			for(int i = 0; i < state.getWidth(); i++){
 				for(int j = 0; j < state.getHeight(); j++){
