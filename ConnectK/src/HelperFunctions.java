@@ -43,7 +43,6 @@ public class HelperFunctions {
 				}
 			}
 			boardMoves.put(state.hashCode(), rMoves);
-			System.out.println(boardMoves.get(state.hashCode()).toString() + " " + boardMoves.size());
 			return rMoves;
 		}
 		else{

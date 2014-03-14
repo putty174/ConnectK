@@ -124,7 +124,7 @@ public class GameSearcher {
 		}
 		int value = Integer.MIN_VALUE;
 
-		ArrayList<Point> rMoves = helper.generateRelevantMoves(state);
+		ArrayList<Point> rMoves = (ArrayList<Point>) helper.generateRelevantMoves(state).clone();
 		ArrayList<PointWrapper> rMovesWrapped = new ArrayList<PointWrapper>();
 		for(Point move:rMoves){
 			BoardModel c = state.placePiece(move, TeamMaybeAI.player);
@@ -152,7 +152,7 @@ public class GameSearcher {
 		}
 		int value = Integer.MAX_VALUE;
 
-		ArrayList<Point> rMoves = helper.generateRelevantMoves(state);
+		ArrayList<Point> rMoves = (ArrayList<Point>) helper.generateRelevantMoves(state).clone();
 		ArrayList<PointWrapper> rMovesWrapped = new ArrayList<PointWrapper>();
 		for(Point move:rMoves){
 
