@@ -54,6 +54,7 @@ public class TeamMaybeAI extends CKPlayer {
 	public Point getMove(BoardModel state, int deadline) {
 		start = System.currentTimeMillis();
 		board = state;
+		HelperFunctions helper = new HelperFunctions();
 		if(state.lastMove == null)
 			move = firstMove(state);
 		else {
@@ -62,7 +63,7 @@ public class TeamMaybeAI extends CKPlayer {
 			Point tempMove;
 			while(!timesUp(deadline)){
 				maxDepth++;
-				tempMove = GS.alphaBetaSearch(board, relaventMoves, deadline, maxDepth);
+				tempMove = GS.alphaBetaSearch(board, relaventMoves, deadline, maxDepth, helper);
 				if(tempMove != null){
 					move = tempMove;
 				}

@@ -20,18 +20,19 @@ public class GameSearcher {
 	TreeMap<Integer, BoardModel> lastMoves = new TreeMap<Integer, BoardModel>();
 
 	public GameSearcher(){
-		helper = new HelperFunctions();
+		
 	}
 	/*
 	 * alphaBetaSearch() returns the point corresponding to the highest minmax algorithm value 
 	 * found via a depth-limited search alpha-beta pruning and some given evaluation function.
 	 */
 	
-	public Point minMaxSearch(BoardModel state, int deadline, int maxDepth){
+	public Point minMaxSearch(BoardModel state, int deadline, int maxDepth, HelperFunctions helper){
+		this.helper = helper;
 		int depth = 0;
 		this.deadline = deadline;
 		this.maxDepth = maxDepth;
-		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		ArrayList<Point> rMoves = helper.generateRelevantMoves(state);
 		Point bestMove = rMoves.get(0);
 		int best = Integer.MIN_VALUE;
 		for(Point move:rMoves){
@@ -52,7 +53,7 @@ public class GameSearcher {
 			return eval(state, depth, true);
 		}
 		int value = Integer.MIN_VALUE;
-		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		ArrayList<Point> rMoves = helper.generateRelevantMoves(state);
 		for(Point move:rMoves){
 			value = Math.max(value, minValue(state.placePiece(move, TeamMaybeAI.player), depth + 1));
 		}
@@ -65,14 +66,15 @@ public class GameSearcher {
 		}
 		
 		int value = Integer.MAX_VALUE;
-		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		ArrayList<Point> rMoves = helper.generateRelevantMoves(state);
 		for(Point move:rMoves){
 			value = Math.min(value, maxValue(state.placePiece(move, TeamMaybeAI.enemy), depth + 1));
 		}
 		return value;
 	}
 
-	public Point alphaBetaSearch(BoardModel state, TreeMap<Integer, BoardModel> m, int deadline, int maxDepth){
+	public Point alphaBetaSearch(BoardModel state, TreeMap<Integer, BoardModel> m, int deadline, int maxDepth, HelperFunctions helper){
+		this.helper = helper;
 		int depth = 0;
 		moves = m;
 		this.deadline = deadline;
@@ -92,7 +94,7 @@ public class GameSearcher {
 		//	}
 
 		lastMoves = moves;
-		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		ArrayList<Point> rMoves = helper.generateRelevantMoves(state);
 		alpha = Integer.MIN_VALUE;
 		beta = Integer.MAX_VALUE;
 		for(Point move:rMoves){
@@ -122,15 +124,20 @@ public class GameSearcher {
 		}
 		int value = Integer.MIN_VALUE;
 
-		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		ArrayList<Point> rMoves = helper.generateRelevantMoves(state);
+		ArrayList<PointWrapper> rMovesWrapped = new ArrayList<PointWrapper>();
 		for(Point move:rMoves){
 			BoardModel c = state.placePiece(move, TeamMaybeAI.player);
 			value = Math.max(value, minValue(c, depth + 1, a, b));
+			rMovesWrapped.add(new PointWrapper(value, move));
 			if(value >= b){
+				helper.updateMoveOrdering(rMovesWrapped, state);
 				return value;
 			}
 			a = Math.max(a, value);
 		}
+		helper.updateMoveOrdering(rMovesWrapped, state);
+
 		return value;
 	}
 
@@ -140,19 +147,26 @@ public class GameSearcher {
 	 */
 	private int minValue(BoardModel state, int depth, int a, int b) {
 		if(state.winner() != -1 || depth >= maxDepth || TeamMaybeAI.timesUp(deadline)){
+
 			return eval(state, depth, false);
 		}
 		int value = Integer.MAX_VALUE;
 
-		ArrayList<Point> rMoves = HelperFunctions.generateRelevantMoves(state);
+		ArrayList<Point> rMoves = helper.generateRelevantMoves(state);
+		ArrayList<PointWrapper> rMovesWrapped = new ArrayList<PointWrapper>();
 		for(Point move:rMoves){
+
 			BoardModel c = state.placePiece(move, TeamMaybeAI.enemy);
 			value = Math.min(value, maxValue(c, depth + 1, a, b));
+			rMovesWrapped.add(new PointWrapper(value, move));
 			if(value <= a){
+				helper.updateMoveOrdering(rMovesWrapped, state);
 				return value;
 			}
 			b = Math.min(b, value);
 		}
+		helper.updateMoveOrdering(rMovesWrapped, state);
+
 		return value;
 	}
 
