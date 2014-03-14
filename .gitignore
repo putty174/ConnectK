@@ -221,3 +221,11 @@ TestEnvironment/src/Searcher.java
 TestEnvironment/src/Searcher.java
 TestEnvironment/src/Node.java
 >>>>>>> Having git ignore files not relevant to the project.
+TestEnvironment/BoardNode.java
+TestEnvironment/GameSearcher.java
+TestEnvironment/HelperFunctions.java
+TestEnvironment/TeamMaybeAI.java
+TestEnvironment/src/BoardNode.java
+TestEnvironment/src/GameSearcher.java
+TestEnvironment/src/HelperFunctions.java
+TestEnvironment/src/TeamMaybeAI.java
