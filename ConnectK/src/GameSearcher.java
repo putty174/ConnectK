@@ -41,9 +41,9 @@ public class GameSearcher {
 		
 		//WARNING: TreeMaps sort from least to greatest. Remember to traverse backwards
 		
-		for(BoardModel b : moves.values()){
-			int thisMoveValue = minValue(c, depth);
-		}
+		//for(BoardModel b : moves.values()){
+	//		int thisMoveValue = minValue(c, depth);
+	//	}
 		
 		lastMoves = moves;
 
@@ -192,6 +192,9 @@ public class GameSearcher {
 		if(state.winner() == TeamMaybeAI.enemy){
 			return Integer.MIN_VALUE;
 		}
+		if(state.winner() == 0){
+			return Integer.MAX_VALUE - 1;
+		}
 		HashSet<HashSet<Point>> ourChains = new HashSet<HashSet<Point>>();
 		HashSet<HashSet<Point>> enemyChains = new HashSet<HashSet<Point>>();
 		for(int i = 0; i < state.getWidth(); i++){
@@ -205,9 +208,9 @@ public class GameSearcher {
 				else if(state.getSpace(i,j) == TeamMaybeAI.enemy){
 					ArrayList<HashSet<Point>> chains = generateChains(i, j, state, TeamMaybeAI.enemy);
 					for(HashSet<Point> chain:chains){
-						if(!isMax && chain.size() > state.getkLength() - 2){	//Quiescence test
-							return minValue(state, depth - 1);
-						}
+			//			if(!isMax && chain.size() > state.getkLength() - 2){	//Quiescence test
+			//				return minValue(state, depth - 1);
+			//			}
 						enemyChains.add(chain);
 					}
 				}
