@@ -107,6 +107,7 @@ public class GameSearcher {
 			if(best < thisMoveValue){
 				best = thisMoveValue;
 				bestMove = move;
+				System.out.println("Best Move: " + bestMove);
 			}
 		}
 		return bestMove;
@@ -129,6 +130,7 @@ public class GameSearcher {
 		for(Point move:rMoves){
 			BoardModel c = state.placePiece(move, TeamMaybeAI.player);
 			value = Math.max(value, minValue(c, depth + 1, a, b));
+			System.out.println(" >> " + value);
 			rMovesWrapped.add(new PointWrapper(value, move));
 			if(value >= b){
 				helper.updateMoveOrdering(rMovesWrapped, state);
@@ -239,7 +241,7 @@ public class GameSearcher {
 			return Integer.MAX_VALUE;
 		}
 		if(state.winner() == TeamMaybeAI.enemy){
-			return Integer.MIN_VALUE;
+			return Integer.MIN_VALUE + 1;
 		}
 		if(state.winner() == 0){
 			return Integer.MAX_VALUE - 1;
@@ -257,9 +259,9 @@ public class GameSearcher {
 				else if(state.getSpace(i,j) == TeamMaybeAI.enemy){
 					ArrayList<HashSet<Point>> chains = generateChains(i, j, state, TeamMaybeAI.enemy);
 					for(HashSet<Point> chain:chains){
-						//			if(!isMax && chain.size() > state.getkLength() - 2){	//Quiescence test
-						//				return minValue(state, depth - 1);
-						//			}
+						if(!isMax && chain.size() > state.getkLength() - 2){	//Quiescence test
+							return minValue(state, depth - 1);
+						}
 						enemyChains.add(chain);
 					}
 				}
